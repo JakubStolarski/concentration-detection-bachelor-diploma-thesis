@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset="utf-8" />
+  <title>Concentration detection</title>
+  <link type="text/css" rel="stylesheet"
+        href="{{ url_for('static',
+              filename='hello.css')}}" />
+</head>
+<body>
+	<element onload = "concentration_detection_onload">
+	<button type = "submit" onclick = 'myfunction_clickevent()'> Run </button>
+	<script type = "text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+	<script>
+    		function myfunction_onload(){
+       			 $.ajax({
+            			url: "face_landmark_detection_and_showcase.py",
+             			context: document.body
+            		})
+        	}
+    	</script>
+	<script>
+    		function myfunction_clickevent(){
+        	$.ajax({
+            	url:"/run",
+            	context: document.body});}
+	</script>
+</body>
+</html>
