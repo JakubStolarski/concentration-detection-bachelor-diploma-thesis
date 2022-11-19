@@ -1,11 +1,27 @@
 from flask import Flask, render_template, request
 import tester
+from enum import Enum
+
+
+class NoInput(Exception):
+    # Raised when neural network failed to detect face/hand
+    pass
+
+
+class InputNames(str, Enum):
+    Mode = "Mode",
+    Camera_ID = "Camera ID",
+    Distraction_Time = "Distraction Time",
+    Detection_Confidence = "Detection Confidence",
+    Tracking_Confidence = "Tracking Confidence"
+
 
 app = Flask(__name__, template_folder='templates')
 
 
-def detect_concentration(mode, camera_id, detection_confidence, tracking_confidence):
-    concentration_detection = tester.ConcentrationDetection(mode, camera_id, detection_confidence, tracking_confidence)
+def detect_concentration(mode, camera_id, distraction_time, detection_confidence, tracking_confidence):
+    concentration_detection = tester.ConcentrationDetection(mode, camera_id, distraction_time,
+                                                            detection_confidence, tracking_confidence)
     concentration_detection.run()
 
 
@@ -16,13 +32,31 @@ def index():
 
 @app.route('/run', methods=['GET', "POST"])
 def run():
+    input_values = {
+        InputNames.Mode: 0,
+        InputNames.Camera_ID: 0,
+        InputNames.Distraction_Time: 5,
+        InputNames.Detection_Confidence: 0.5,
+        InputNames.Tracking_Confidence: 0.5
+    }
     if request.method == 'POST':
-        mode = int(request.form['Mode'])
-        camera_id = int(request.form['Camera ID'])
-        detection_confidence = float(request.form['Detection Confidence'])
-        tracking_confidence = float(request.form['Tracking Confidence'])
-        if mode and camera_id and detection_confidence and tracking_confidence:
-            detect_concentration(mode, camera_id, detection_confidence, tracking_confidence)
+        for input_key in input_values:
+            try:
+                if input_key in ['Mode', 'Camera ID']:
+                    input_values[input_key] = int(request.form[input_key])
+                else:
+                    input_values[input_key] = float(request.form[input_key])
+            except NoInput:
+                pass
+        # mode = int(request.form['Mode'])
+        # camera_id = int(request.form['Camera ID'])
+        # distraction_time = float(request.form['Distraction Time'])
+        # detection_confidence = float(request.form['Detection Confidence'])
+        # tracking_confidence = float(request.form['Tracking Confidence'])
+        detect_concentration(input_values[InputNames.Mode], input_values[InputNames.Camera_ID],
+                             input_values[InputNames.Distraction_Time],
+                             input_values[InputNames.Detection_Confidence],
+                             input_values[InputNames.Tracking_Confidence])
     return render_template('configuration.html')
 
 

@@ -5,7 +5,7 @@
     <title>First Flask App</title>
 </head>
 <body>
-    <h1>{% block title %} Add a New Message {% endblock %}</h1>
+    <h1>{% block title %} Configuration Menu {% endblock %}</h1>
     <form method="post">
         <label for="mode">Mode</label>
         <br>
@@ -21,17 +21,24 @@
                value="{{ request.form['Camera ID'] }}"></input>
         <br>
 
+        <label for="mode">Distraction Time</label>
+        <br>
+        <input type="number" step="1" name="Distraction Time"
+               placeholder="In seconds"
+               value="{{ request.form['Distraction Time'] }}"></input>
+        <br>
+
         <label for="mode">Detection Confidence</label>
         <br>
         <input type="number" step="0.1" name="Detection Confidence"
-               placeholder="Detection Confidence"
+               placeholder="From 0 to 1"
                value="{{ request.form['Detection Confidence'] }}"></input>
         <br>
 
         <label for="mode">Tracking Confidence</label>
         <br>
         <input type="number" step="0.1" name="Tracking Confidence"
-               placeholder="Tracking Confidence"
+               placeholder="From 0 to 1"
                value="{{ request.form['Tracking Confidence'] }}"></input>
         <br>
 

@@ -35,14 +35,14 @@ class Hand(IntEnum):
 
 
 class ConcentrationDetection:
-    def __init__(self, mode, camera_id=0, detection_confidence=0.5, tracking_confidence=0.5):
+    def __init__(self, mode, camera_id=0, distraction_time=5, detection_confidence=0.5, tracking_confidence=0.5):
         self._activate_mp_solutions(detection_confidence, tracking_confidence)
         self._set_initial_boundaries()
-
         self.starter_time = time.time()
         self.alarm_flag = False
         self.mode = mode
         self.camera_id = camera_id
+        self.distraction_time = distraction_time
 
     def _activate_mp_solutions(self, detection_confidence, tracking_confidence):
         self.face_mesh = mp.solutions.face_mesh.FaceMesh(
