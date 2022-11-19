@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>First Flask App</title>
+</head>
+<body>
+    <h1>{% block title %} Add a New Message {% endblock %}</h1>
+    <form method="post">
+        <label for="mode">Mode</label>
+        <br>
+        <input type="number" step="1" name="Mode"
+               placeholder="Mode"
+               value="{{ request.form['Mode'] }}"></input>
+        <br>
+
+        <label for="mode">Camera ID</label>
+        <br>
+        <input type="number" step="1" name="Camera ID"
+               placeholder="Camera ID"
+               value="{{ request.form['Camera ID'] }}"></input>
+        <br>
+
+        <label for="mode">Detection Confidence</label>
+        <br>
+        <input type="number" step="0.1" name="Detection Confidence"
+               placeholder="Detection Confidence"
+               value="{{ request.form['Detection Confidence'] }}"></input>
+        <br>
+
+        <label for="mode">Tracking Confidence</label>
+        <br>
+        <input type="number" step="0.1" name="Tracking Confidence"
+               placeholder="Tracking Confidence"
+               value="{{ request.form['Tracking Confidence'] }}"></input>
+        <br>
+
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>
