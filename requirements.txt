@@ -7,3 +7,4 @@ deepface==0.0.75
 tensorflow==2.10.0
 matplotlib==3.5.3
 Pillow==9.2.0
+easygui==0.98.3

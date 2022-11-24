@@ -20,8 +20,8 @@ app = Flask(__name__, template_folder='templates')
 
 
 def detect_concentration(mode, camera_id, distraction_time, detection_confidence, tracking_confidence):
-    concentration_detection = tester.ConcentrationDetection(mode, camera_id, distraction_time,
-                                                            detection_confidence, tracking_confidence)
+    concentration_detection = tester.ConcentrationDetection(mode, camera_id, distraction_time, detection_confidence,
+                                                            tracking_confidence)
     concentration_detection.run()
 
 
@@ -48,11 +48,7 @@ def run():
                     input_values[input_key] = float(request.form[input_key])
             except NoInput:
                 pass
-        # mode = int(request.form['Mode'])
-        # camera_id = int(request.form['Camera ID'])
-        # distraction_time = float(request.form['Distraction Time'])
-        # detection_confidence = float(request.form['Detection Confidence'])
-        # tracking_confidence = float(request.form['Tracking Confidence'])
+
         detect_concentration(input_values[InputNames.Mode], input_values[InputNames.Camera_ID],
                              input_values[InputNames.Distraction_Time],
                              input_values[InputNames.Detection_Confidence],
