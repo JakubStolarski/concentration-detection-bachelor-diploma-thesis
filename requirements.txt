@@ -1,9 +1,9 @@
-flask == 1.1.4
-opencv-contrib-python == 4.6.0.66
-mediapipe == 0.8.11
-numpy == 1.23.2	
-screeninfo~=0.8.1
-deepface~=0.0.75
-tensorflow~=2.10.0
-matplotlib~=3.5.3
-Pillow~=9.2.0
+flask==1.1.4
+mediapipe==0.8.11
+numpy==1.23.2
+opencv-contrib-python
+screeninfo==0.8.1
+deepface==0.0.75
+tensorflow==2.10.0
+matplotlib==3.5.3
+Pillow==9.2.0
