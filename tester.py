@@ -274,7 +274,8 @@ class ConcentrationDetection:
 
 
 if __name__ == "__main__":
-    concentration_detection = ConcentrationDetection(1, 1)
+    concentration_detection = ConcentrationDetection(Modes.SHOWCASE)
     while True:
         concentration_detection.run()
-
+        if cv2.waitKey(5) & 0xFF == 27:
+            break
