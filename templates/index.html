@@ -1,5 +1,9 @@
 <!DOCTYPE html>
 <html lang='en'>
+<style>
+  h1 {text-align: center;}
+  .center {text-align: center;}
+</style>
 <head>
   <meta charset="utf-8" />
   <title>Concentration detection</title>
@@ -8,9 +12,18 @@
               filename='hello.css')}}" />
 </head>
 <body>
-	<element onload = "concentration_detection_onload">
-	<a href=run><button type = "submit" onclick = 'myfunction_clickevent()'> Run </button>
-	<a href=info><button type = "submit" onclick = 'info_clickevent()'> Info </button>
+<!--	<element onload = "concentration_detection_onload">-->
+    <h1>
+        Detektor koncentracji
+    </h1>
+    <br> <br>
+    <div class="center">
+        <a href=configuration><button type = "submit" onclick = 'myfunction_clickevent()'> Configure and Run </button>
+            <br><br>
+        <a href=info><button type = "submit" onclick = 'info_clickevent()'> Instrukcja </button>
+    </div>
+<!--	<a href=configuration><button type = "submit" onclick = 'myfunction_clickevent()'> Configure and Run </button>-->
+<!--	<a href=info><button type = "submit" onclick = 'info_clickevent()'> Info </button>-->
     <div class="content">
     {% block content %} {% endblock %}
     </div>

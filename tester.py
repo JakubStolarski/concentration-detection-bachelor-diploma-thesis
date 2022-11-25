@@ -46,6 +46,10 @@ class ConcentrationDetection:
         self.camera_id = camera_id
         self.distraction_tolerance = distraction_tolerance
         self.frame = None
+        self.run_initialized = False
+        self.curr_alarm_time = self.start_alarm_time = None
+        self.bounded = False
+        self.bounds = 0
 
     def _activate_mp_solutions(self, detection_confidence, tracking_confidence):
         self.face_mesh = mp.solutions.face_mesh.FaceMesh(
@@ -115,22 +119,16 @@ class ConcentrationDetection:
                 for idx, lm in enumerate(face_landmarks.landmark):
                     if idx in [Landmarks.NOSE_TIP, Landmarks.RIGHT_EYE, Landmarks.RIGHT_MOUTH,
                                Landmarks.CHIN, Landmarks.LEFT_EYE, Landmarks.LEFT_MOUTH]:
-                        if idx == 1:
+                        if idx == Landmarks.NOSE_TIP:
                             nose_2d = (lm.x * img_w, lm.y * img_h)
                             nose_3d = (lm.x * img_w, lm.y * img_h, lm.z * 8000)
 
                         x, y = int(lm.x * img_w), int(lm.y * img_h)
 
-                        # Get the 2D Coordinates
                         face_2d.append([x, y])
-
-                        # Get the 3D Coordinates
                         face_3d.append([x, y, lm.z])
 
-                        # Convert it to the NumPy array
                 face_2d = np.array(face_2d, dtype=np.float64)
-
-                # Convert it to the NumPy array
                 face_3d = np.array(face_3d, dtype=np.float64)
 
                 # The camera matrix
@@ -199,13 +197,15 @@ class ConcentrationDetection:
 
         return is_ok, results_hand, results_face, x, y, z
 
+    def _initialize(self):
+        self.cap = cv2.VideoCapture(self.camera_id)
+
     def run(self):
-        cap = cv2.VideoCapture(self.camera_id)
-        curr_alarm_time = None
-        bounded = False
-        bounds = 0
-        # while True:
-        vid, self.frame = cap.read()
+        if not self.run_initialized:
+            self._initialize()
+            self.run_initialized = True
+
+        vid, self.frame = self.cap.read()
         is_ok, results_hand, results_face, x, y, z = self._frame_operations()
 
         if is_ok and self.mode in [Modes.CALIBRATION, Modes.SHOWCASE]:
@@ -217,14 +217,14 @@ class ConcentrationDetection:
                     for elem_num, coordinate in enumerate(point):
                         if coordinate < self.bound_workspace[0][elem_num]:
                             self.bound_workspace[0][elem_num] = coordinate
-                            bounded = True
+                            self.bounded = True
                         if coordinate > self.bound_workspace[1][elem_num]:
                             self.bound_workspace[1][elem_num] = coordinate
-                            bounded = True
-                        if bounded:
-                            bounds += 1
-                            bounded = False
-                if bounds >= 4:
+                            self.bounded = True
+                        if self.bounded:
+                            self.bounds += 1
+                            self.bounded = False
+                if self.bounds >= 4:
                     self.alarm_flag = True
                     if x in range(int(self.bound_workspace[0][0]), int(self.bound_workspace[1][0])):
                         if y in range(int(self.bound_workspace[0][1]), int(self.bound_workspace[1][1])):
@@ -232,13 +232,14 @@ class ConcentrationDetection:
                                 self.alarm_flag = False
             except DetectionError:
                 workspace = [[x, y, z]]
-                bounds = 1
+                self.bounds = 1
 
         if results_hand.multi_hand_landmarks and self.mode == Modes.SHOWCASE:
             for hand_landmarks in results_hand.multi_hand_landmarks:
                 self.mp_drawing.draw_landmarks(
                     self.frame, hand_landmarks, self.mp_hands.HAND_CONNECTIONS)
-        if bounds > 3:
+
+        if self.bounds > 3:
             alarm_flag = True
             if results_face.multi_face_landmarks:
                 if int(x) in range(int(self.bound_workspace[0][0]), int(self.bound_workspace[1][0])):
@@ -248,18 +249,18 @@ class ConcentrationDetection:
                             alarm_flag = False
 
             if alarm_flag:
-                if not curr_alarm_time:
-                    curr_alarm_time = time.time()
-                    start_alarm_time = time.time()
+                if not self.curr_alarm_time:
+                    self.curr_alarm_time = time.time()
+                    self.start_alarm_time = time.time()
                 else:
-                    curr_alarm_time = time.time()
-                    if curr_alarm_time - start_alarm_time > self.distraction_tolerance:
+                    self.curr_alarm_time = time.time()
+                    if self.curr_alarm_time - self.start_alarm_time > self.distraction_tolerance:
                         e.msgbox("An error has occured! :(", "Error")
                         cv2.putText(self.frame, "Alarm!",
                                     (int(self.frame.shape[1] / 2), int(self.frame.shape[0] / 2)),
                                     cv2.FONT_HERSHEY_SIMPLEX, 2.0, (0, 0, 255), 2)
             else:
-                curr_alarm_time = start_alarm_time = None
+                self.curr_alarm_time = self.start_alarm_time = None
 
         if self.mode == Modes.SHOWCASE:
             running_time = "--- %s seconds ---" % (time.time() - self.starter_time)
@@ -272,12 +273,8 @@ class ConcentrationDetection:
         self.frame = jpeg.tobytes()
 
 
-            # if cv2.waitKey(5) & 0xFF == 27:
-            #     print(self.bound_workspace)
-            #     break
-        cap.release()
-
-
 if __name__ == "__main__":
     concentration_detection = ConcentrationDetection(1, 1)
-    concentration_detection.run()
+    while True:
+        concentration_detection.run()
+

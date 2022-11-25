@@ -33,14 +33,12 @@ input_values = InputValues()
 app = Flask(__name__, template_folder='templates')
 
 
-def detect_concentration(mode, camera_id, distraction_time, detection_confidence, tracking_confidence):
-    concentration_detection = tester.ConcentrationDetection(mode, camera_id, distraction_time, detection_confidence,
-                                                            tracking_confidence)
+def configure_concentration_detection(concentration_detection):
+
     while True:
         concentration_detection.run()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + concentration_detection.frame + b'\r\n\r\n')
-
 
 
 @app.route('/')
@@ -61,11 +59,6 @@ def run():
             except NoInput:
                 pass
 
-        # input_values.frame = detect_concentration(input_values.values[InputNames.Mode],
-        #         #                                           input_values.values[InputNames.Camera_ID],
-        #         #                                           input_values.values[InputNames.Distraction_Time],
-        #         #                                           input_values.values[InputNames.Detection_Confidence],
-        #         #                                           input_values.values[InputNames.Tracking_Confidence])
     return render_template('configuration.html')
 
 
@@ -77,12 +70,12 @@ def info():
 @app.route('/video_feed')
 def video_feed():
     global input_values
-    return Response(detect_concentration(input_values.values[InputNames.Mode],
-                                         input_values.values[InputNames.Camera_ID],
-                                         input_values.values[InputNames.Distraction_Time],
-                                         input_values.values[InputNames.Detection_Confidence],
-                                         input_values.values[InputNames.Tracking_Confidence]),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
+    concentration_detection = tester.ConcentrationDetection(input_values.values[InputNames.Mode],
+                                                            input_values.values[InputNames.Camera_ID],
+                                                            input_values.values[InputNames.Distraction_Time],
+                                                            input_values.values[InputNames.Detection_Confidence],
+                                                            input_values.values[InputNames.Tracking_Confidence])
+    return Response(configure_concentration_detection(concentration_detection), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 if __name__ == "__main__":
