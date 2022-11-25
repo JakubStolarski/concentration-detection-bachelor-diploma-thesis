@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, Response
 import tester
 from enum import Enum
 
@@ -16,13 +16,31 @@ class InputNames(str, Enum):
     Tracking_Confidence = "Tracking Confidence"
 
 
+class InputValues:
+    def __init__(self):
+        self.values = {
+            InputNames.Mode: 1,
+            InputNames.Camera_ID: 0,
+            InputNames.Distraction_Time: 5,
+            InputNames.Detection_Confidence: 0.5,
+            InputNames.Tracking_Confidence: 0.5
+        }
+        self.frame = None
+
+
+input_values = InputValues()
+
 app = Flask(__name__, template_folder='templates')
 
 
 def detect_concentration(mode, camera_id, distraction_time, detection_confidence, tracking_confidence):
     concentration_detection = tester.ConcentrationDetection(mode, camera_id, distraction_time, detection_confidence,
                                                             tracking_confidence)
-    concentration_detection.run()
+    while True:
+        concentration_detection.run()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + concentration_detection.frame + b'\r\n\r\n')
+
 
 
 @app.route('/')
@@ -30,35 +48,41 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/run', methods=['GET', "POST"])
+@app.route('/configuration', methods=['GET', "POST"])
 def run():
-    input_values = {
-        InputNames.Mode: 0,
-        InputNames.Camera_ID: 0,
-        InputNames.Distraction_Time: 5,
-        InputNames.Detection_Confidence: 0.5,
-        InputNames.Tracking_Confidence: 0.5
-    }
+    global input_values
     if request.method == 'POST':
-        for input_key in input_values:
+        for input_key in input_values.values:
             try:
                 if input_key in ['Mode', 'Camera ID']:
-                    input_values[input_key] = int(request.form[input_key])
+                    input_values.values[input_key] = int(request.form[input_key])
                 else:
-                    input_values[input_key] = float(request.form[input_key])
+                    input_values.values[input_key] = float(request.form[input_key])
             except NoInput:
                 pass
 
-        detect_concentration(input_values[InputNames.Mode], input_values[InputNames.Camera_ID],
-                             input_values[InputNames.Distraction_Time],
-                             input_values[InputNames.Detection_Confidence],
-                             input_values[InputNames.Tracking_Confidence])
+        # input_values.frame = detect_concentration(input_values.values[InputNames.Mode],
+        #         #                                           input_values.values[InputNames.Camera_ID],
+        #         #                                           input_values.values[InputNames.Distraction_Time],
+        #         #                                           input_values.values[InputNames.Detection_Confidence],
+        #         #                                           input_values.values[InputNames.Tracking_Confidence])
     return render_template('configuration.html')
 
 
 @app.route('/info')
 def info():
     return render_template('info.html')
+
+
+@app.route('/video_feed')
+def video_feed():
+    global input_values
+    return Response(detect_concentration(input_values.values[InputNames.Mode],
+                                         input_values.values[InputNames.Camera_ID],
+                                         input_values.values[InputNames.Distraction_Time],
+                                         input_values.values[InputNames.Detection_Confidence],
+                                         input_values.values[InputNames.Tracking_Confidence]),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 if __name__ == "__main__":

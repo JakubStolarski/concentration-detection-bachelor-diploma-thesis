@@ -45,6 +45,7 @@ class ConcentrationDetection:
         self.mode = mode
         self.camera_id = camera_id
         self.distraction_tolerance = distraction_tolerance
+        self.frame = None
 
     def _activate_mp_solutions(self, detection_confidence, tracking_confidence):
         self.face_mesh = mp.solutions.face_mesh.FaceMesh(
@@ -165,109 +166,115 @@ class ConcentrationDetection:
 
                 return [p1, p2, x, y, z]
 
-    def _frame_operations(self, frame):
+    def _frame_operations(self):
         is_ok = x = y = z = None
         # Flip the frame horizontally for a later selfie-view display
         # Also convert the color space from BGR to RGB
-        frame = cv2.cvtColor(cv2.flip(frame, 1), cv2.COLOR_BGR2RGB)
+        self.frame = cv2.cvtColor(cv2.flip(self.frame, 1), cv2.COLOR_BGR2RGB)
         # To improve performance
-        frame.flags.writeable = False
+        self.frame.flags.writeable = False
 
         # Get the result
-        results_face = self.face_mesh.process(frame)
-        results_hand = self.hands.process(frame)
+        results_face = self.face_mesh.process(self.frame)
+        results_hand = self.hands.process(self.frame)
 
         # To improve performance
-        frame.flags.writeable = True
+        self.frame.flags.writeable = True
 
         # Convert the color space from RGB to BGR
-        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+        self.frame = cv2.cvtColor(self.frame, cv2.COLOR_RGB2BGR)
         if results_face.multi_face_landmarks:
-            [p1, p2, x, y, z] = self._get_translation_and_rotation(frame, results_face)
-            if x is None:
-                stop = 1
+            [p1, p2, x, y, z] = self._get_translation_and_rotation(self.frame, results_face)
             if self.mode == Modes.SHOWCASE:
-                cv2.line(frame, p1, p2, (255, 0, 0), 2)
+                cv2.line(self.frame, p1, p2, (255, 0, 0), 2)
 
         if results_hand.multi_hand_landmarks:
             for finger_landmark in [Hand.THUMB_BASE, Hand.THUMB_MID_LOW, Hand.THUMB_MID_HIGH, Hand.INDEX_MID_LOW]:
                 is_ok = True
-                thumb_tip = self._finger(4, results_hand, frame.shape[1], frame.shape[0])
-                section_landmark = self._finger(finger_landmark, results_hand, frame.shape[1], frame.shape[0])
+                thumb_tip = self._finger(4, results_hand, self.frame.shape[1], self.frame.shape[0])
+                section_landmark = self._finger(finger_landmark, results_hand, self.frame.shape[1], self.frame.shape[0])
                 if thumb_tip[1] > section_landmark[1]:
                     is_ok = False
                     break
 
-        return frame, is_ok, results_hand, results_face, x, y, z
+        return is_ok, results_hand, results_face, x, y, z
 
     def run(self):
         cap = cv2.VideoCapture(self.camera_id)
         curr_alarm_time = None
         bounded = False
         bounds = 0
-        while True:
-            vid, frame = cap.read()
-            frame, is_ok, results_hand, results_face, x, y, z = self._frame_operations(frame)
+        # while True:
+        vid, self.frame = cap.read()
+        is_ok, results_hand, results_face, x, y, z = self._frame_operations()
 
-            if is_ok and self.mode in [Modes.CALIBRATION, Modes.SHOWCASE]:
-                cv2.putText(frame, "Okay!!", (int(frame.shape[1]*0.7), int(frame.shape[0]*0.85)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-                try:
-                    workspace = [[x, y, z]]
-                    for point in workspace:
-                        for elem_num, coordinate in enumerate(point):
-                            if coordinate < self.bound_workspace[0][elem_num]:
-                                self.bound_workspace[0][elem_num] = coordinate
-                                bounded = True
-                            if coordinate > self.bound_workspace[1][elem_num]:
-                                self.bound_workspace[1][elem_num] = coordinate
-                                bounded = True
-                            if bounded:
-                                bounds += 1
-                                bounded = False
-                    if bounds >= 4:
-                        self.alarm_flag = True
-                        if x in range(int(self.bound_workspace[0][0]), int(self.bound_workspace[1][0])):
-                            if y in range(int(self.bound_workspace[0][1]), int(self.bound_workspace[1][1])):
-                                if z in range(int(self.bound_workspace[0][2]), int(self.bound_workspace[1][2])):
-                                    self.alarm_flag = False
-                except DetectionError:
-                    workspace = [[x, y, z]]
-                    bounds = 1
+        if is_ok and self.mode in [Modes.CALIBRATION, Modes.SHOWCASE]:
+            cv2.putText(self.frame, "Okay!!", (int(self.frame.shape[1]*0.7), int(self.frame.shape[0]*0.85)),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            try:
+                workspace = [[x, y, z]]
+                for point in workspace:
+                    for elem_num, coordinate in enumerate(point):
+                        if coordinate < self.bound_workspace[0][elem_num]:
+                            self.bound_workspace[0][elem_num] = coordinate
+                            bounded = True
+                        if coordinate > self.bound_workspace[1][elem_num]:
+                            self.bound_workspace[1][elem_num] = coordinate
+                            bounded = True
+                        if bounded:
+                            bounds += 1
+                            bounded = False
+                if bounds >= 4:
+                    self.alarm_flag = True
+                    if x in range(int(self.bound_workspace[0][0]), int(self.bound_workspace[1][0])):
+                        if y in range(int(self.bound_workspace[0][1]), int(self.bound_workspace[1][1])):
+                            if z in range(int(self.bound_workspace[0][2]), int(self.bound_workspace[1][2])):
+                                self.alarm_flag = False
+            except DetectionError:
+                workspace = [[x, y, z]]
+                bounds = 1
 
-            if results_hand.multi_hand_landmarks and self.mode == Modes.SHOWCASE:
-                for hand_landmarks in results_hand.multi_hand_landmarks:
-                    self.mp_drawing.draw_landmarks(
-                        frame, hand_landmarks, self.mp_hands.HAND_CONNECTIONS)
-            if bounds > 3:
-                alarm_flag = True
-                if results_face.multi_face_landmarks:
-                    if int(x) in range(int(self.bound_workspace[0][0]), int(self.bound_workspace[1][0])):
-                        # todo add funtion for checking
-                        if int(y) in range(int(self.bound_workspace[0][1]), int(self.bound_workspace[1][1])):
-                            if self.bound_workspace[0][2] < z < self.bound_workspace[1][2]:
-                                alarm_flag = False
+        if results_hand.multi_hand_landmarks and self.mode == Modes.SHOWCASE:
+            for hand_landmarks in results_hand.multi_hand_landmarks:
+                self.mp_drawing.draw_landmarks(
+                    self.frame, hand_landmarks, self.mp_hands.HAND_CONNECTIONS)
+        if bounds > 3:
+            alarm_flag = True
+            if results_face.multi_face_landmarks:
+                if int(x) in range(int(self.bound_workspace[0][0]), int(self.bound_workspace[1][0])):
+                    # todo add funtion for checking
+                    if int(y) in range(int(self.bound_workspace[0][1]), int(self.bound_workspace[1][1])):
+                        if self.bound_workspace[0][2] < z < self.bound_workspace[1][2]:
+                            alarm_flag = False
 
-                if alarm_flag:
-                    if not curr_alarm_time:
-                        curr_alarm_time = time.time()
-                        start_alarm_time = time.time()
-                    else:
-                        curr_alarm_time = time.time()
-                        if curr_alarm_time - start_alarm_time > self.distraction_tolerance:
-                            e.msgbox("An error has occured! :(", "Error")
-                            cv2.putText(frame, "Alarm!", (int(frame.shape[1] / 2), int(frame.shape[0] / 2)),
-                                        cv2.FONT_HERSHEY_SIMPLEX, 2.0, (0, 0, 255), 2)
+            if alarm_flag:
+                if not curr_alarm_time:
+                    curr_alarm_time = time.time()
+                    start_alarm_time = time.time()
                 else:
-                    curr_alarm_time = start_alarm_time = None
+                    curr_alarm_time = time.time()
+                    if curr_alarm_time - start_alarm_time > self.distraction_tolerance:
+                        e.msgbox("An error has occured! :(", "Error")
+                        cv2.putText(self.frame, "Alarm!",
+                                    (int(self.frame.shape[1] / 2), int(self.frame.shape[0] / 2)),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 2.0, (0, 0, 255), 2)
+            else:
+                curr_alarm_time = start_alarm_time = None
 
-            cv2.imshow('Head Pose Estimation', frame)
-            if self.mode == Modes.SHOWCASE:
-                running_time = "--- %s seconds ---" % (time.time() - self.starter_time)
-                cv2.putText(frame, running_time, (int(frame.shape[1] - 200), int(frame.shape[0] - 200)), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1)
-            if cv2.waitKey(5) & 0xFF == 27:
-                print(self.bound_workspace)
-                break
+        if self.mode == Modes.SHOWCASE:
+            running_time = "--- %s seconds ---" % (time.time() - self.starter_time)
+            cv2.putText(self.frame, running_time, (int(self.frame.shape[1] - 200), int(self.frame.shape[0] - 200)),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1)
+
+        # cv2.imshow('Head Pose Estimation', self.frame)
+        ret, jpeg = cv2.imencode('.jpg', self.frame)
+
+        self.frame = jpeg.tobytes()
+
+
+            # if cv2.waitKey(5) & 0xFF == 27:
+            #     print(self.bound_workspace)
+            #     break
         cap.release()
 
 
