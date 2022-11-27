@@ -206,7 +206,7 @@ class ConcentrationDetection:
         is_ok, results_hand, results_face, p1, p2, x, y, z = self._frame_operations()
 
         if is_ok and self.mode in [Modes.CALIBRATION, Modes.SHOWCASE]:
-            cv2.putText(self.frame, "Okay!!", (int(self.frame.shape[1]*0.7), int(self.frame.shape[0]*0.85)),
+            cv2.putText(self.frame, "Okay!!", (int(self.frame.shape[1] * 0.7), int(self.frame.shape[0] * 0.85)),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
             try:
                 workspace = [[x, y, z]]
@@ -271,7 +271,6 @@ class ConcentrationDetection:
                                                         min_detection_confidence=0.5,
                                                         min_tracking_confidence=0.5)
 
-
         # cv2.imshow('Head Pose Estimation', self.frame)
         ret, jpeg = cv2.imencode('.jpg', self.frame)
 
@@ -284,7 +283,7 @@ class ConcentrationDetection:
                 self.run_initialized = True
 
             vid, self.frame = self.cap.read()
-            img_w, img_h = self.frame.shape[:2]
+            img_h, img_w = self.frame.shape[:2]
             is_ok, results_hand, results_face, p1, p2, x, y, z = self._frame_operations()
 
             if results_face.multi_face_landmarks:
@@ -292,7 +291,7 @@ class ConcentrationDetection:
                                         for point in results_face.multi_face_landmarks[0].landmark])
                 POIs = []
                 for landmark in [Landmarks.NOSE_TIP, Landmarks.RIGHT_EYE, Landmarks.RIGHT_MOUTH,
-                                   Landmarks.CHIN, Landmarks.LEFT_EYE, Landmarks.LEFT_MOUTH]:
+                                 Landmarks.CHIN, Landmarks.LEFT_EYE, Landmarks.LEFT_MOUTH]:
                     POIs.append((mesh_points[landmark]))
                 for coordinates in POIs:
                     cv2.circle(self.frame, coordinates, 5, (255, 0, 255), 1, cv2.LINE_AA)
@@ -301,8 +300,22 @@ class ConcentrationDetection:
                 for hand_landmarks in results_hand.multi_hand_landmarks:
                     self.mp_drawing.draw_landmarks(
                         self.frame, hand_landmarks, self.mp_hands.HAND_CONNECTIONS)
+
+            if is_ok:
+                cv2.putText(self.frame, "Okay!!", (int(self.frame.shape[1] * 0.7), int(self.frame.shape[0] * 0.85)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+
+            running_time = "--- %s seconds ---" % round((time.time() - self.starter_time), 2)
+            # show how much time passed
+            cv2.putText(self.frame, running_time, (int(self.frame.shape[1] * 0.1), int(self.frame.shape[0] * 0.8)),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1)
+
             cv2.line(self.frame, p1, p2, (255, 0, 0), 2)
-            cv2.imshow('Head Pose Estimation', self.frame)
+            cv2.imshow('Showcase', self.frame)
+            if cv2.waitKey(5) & 0xFF == 27:
+                break
+        self.cap.release()
+        cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
