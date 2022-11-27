@@ -240,7 +240,7 @@ class ConcentrationDetection:
             alarm_flag = True
             if results_face.multi_face_landmarks:
                 if int(x) in range(int(self.bound_workspace[0][0]), int(self.bound_workspace[1][0])):
-                    # todo add funtion for checking
+                    # todo add funtion for checking if workspace is set
                     if int(y) in range(int(self.bound_workspace[0][1]), int(self.bound_workspace[1][1])):
                         if self.bound_workspace[0][2] < z < self.bound_workspace[1][2]:
                             alarm_flag = False
@@ -259,24 +259,11 @@ class ConcentrationDetection:
             else:
                 self.curr_alarm_time = self.start_alarm_time = None
 
-        if self.mode == Modes.SHOWCASE:
-            running_time = "--- %s seconds ---" % (time.time() - self.starter_time)  # show how much time passed
-            cv2.putText(self.frame, running_time, (int(self.frame.shape[1] - 200), int(self.frame.shape[0] - 200)),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1)
-
-            cv2.line(self.frame, p1, p2, (255, 0, 0), 2)  # show where the face points to
-
-            face_mesh = mp.solutions.face_mesh.FaceMesh(max_num_faces=1,
-                                                        refine_landmarks=True,
-                                                        min_detection_confidence=0.5,
-                                                        min_tracking_confidence=0.5)
-
-        # cv2.imshow('Head Pose Estimation', self.frame)
         ret, jpeg = cv2.imencode('.jpg', self.frame)
 
         self.frame = jpeg.tobytes()
 
-    def showcase(self):  # todo improve face_landmark placement
+    def showcase(self):
         while True:
             if not self.run_initialized:
                 self._initialize()
