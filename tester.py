@@ -109,9 +109,8 @@ class ConcentrationDetection:
             except DetectionError:
                 pass
 
-    @staticmethod
-    def _get_translation_and_rotation(frame, results_face):
-        img_h, img_w, img_c = frame.shape
+    def _get_translation_and_rotation(self, results_face):
+        img_h, img_w, img_c = self.frame.shape
         face_3d = []
         face_2d = []
         if results_face.multi_face_landmarks:
@@ -162,10 +161,10 @@ class ConcentrationDetection:
                 p1 = (int(nose_2d[0]), int(nose_2d[1]))
                 p2 = (int(nose_3d_projection[0][0][0]), int(nose_3d_projection[0][0][1]))
 
-                return [p1, p2, x, y, z]
+                return p1, p2, x, y, z
 
     def _frame_operations(self):
-        is_ok = x = y = z = None
+        is_ok = p1 = p2 = x = y = z = None
         # Flip the frame horizontally for a later selfie-view display
         # Also convert the color space from BGR to RGB
         self.frame = cv2.cvtColor(cv2.flip(self.frame, 1), cv2.COLOR_BGR2RGB)
@@ -182,9 +181,7 @@ class ConcentrationDetection:
         # Convert the color space from RGB to BGR
         self.frame = cv2.cvtColor(self.frame, cv2.COLOR_RGB2BGR)
         if results_face.multi_face_landmarks:
-            [p1, p2, x, y, z] = self._get_translation_and_rotation(self.frame, results_face)
-            if self.mode == Modes.SHOWCASE:
-                cv2.line(self.frame, p1, p2, (255, 0, 0), 2)
+            p1, p2, x, y, z = self._get_translation_and_rotation(results_face)
 
         if results_hand.multi_hand_landmarks:
             for finger_landmark in [Hand.THUMB_BASE, Hand.THUMB_MID_LOW, Hand.THUMB_MID_HIGH, Hand.INDEX_MID_LOW]:
@@ -195,7 +192,7 @@ class ConcentrationDetection:
                     is_ok = False
                     break
 
-        return is_ok, results_hand, results_face, x, y, z
+        return is_ok, results_hand, results_face, p1, p2, x, y, z
 
     def _initialize(self):
         self.cap = cv2.VideoCapture(self.camera_id)
@@ -206,7 +203,7 @@ class ConcentrationDetection:
             self.run_initialized = True
 
         vid, self.frame = self.cap.read()
-        is_ok, results_hand, results_face, x, y, z = self._frame_operations()
+        is_ok, results_hand, results_face, p1, p2, x, y, z = self._frame_operations()
 
         if is_ok and self.mode in [Modes.CALIBRATION, Modes.SHOWCASE]:
             cv2.putText(self.frame, "Okay!!", (int(self.frame.shape[1]*0.7), int(self.frame.shape[0]*0.85)),
@@ -263,19 +260,55 @@ class ConcentrationDetection:
                 self.curr_alarm_time = self.start_alarm_time = None
 
         if self.mode == Modes.SHOWCASE:
-            running_time = "--- %s seconds ---" % (time.time() - self.starter_time)
+            running_time = "--- %s seconds ---" % (time.time() - self.starter_time)  # show how much time passed
             cv2.putText(self.frame, running_time, (int(self.frame.shape[1] - 200), int(self.frame.shape[0] - 200)),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1)
+
+            cv2.line(self.frame, p1, p2, (255, 0, 0), 2)  # show where the face points to
+
+            face_mesh = mp.solutions.face_mesh.FaceMesh(max_num_faces=1,
+                                                        refine_landmarks=True,
+                                                        min_detection_confidence=0.5,
+                                                        min_tracking_confidence=0.5)
+
 
         # cv2.imshow('Head Pose Estimation', self.frame)
         ret, jpeg = cv2.imencode('.jpg', self.frame)
 
         self.frame = jpeg.tobytes()
 
+    def showcase(self):  # todo improve face_landmark placement
+        while True:
+            if not self.run_initialized:
+                self._initialize()
+                self.run_initialized = True
+
+            vid, self.frame = self.cap.read()
+            img_w, img_h = self.frame.shape[:2]
+            is_ok, results_hand, results_face, p1, p2, x, y, z = self._frame_operations()
+
+            if results_face.multi_face_landmarks:
+                mesh_points = np.array([np.multiply([point.x, point.y], [img_w, img_h]).astype(int)
+                                        for point in results_face.multi_face_landmarks[0].landmark])
+                POIs = []
+                for landmark in [Landmarks.NOSE_TIP, Landmarks.RIGHT_EYE, Landmarks.RIGHT_MOUTH,
+                                   Landmarks.CHIN, Landmarks.LEFT_EYE, Landmarks.LEFT_MOUTH]:
+                    POIs.append((mesh_points[landmark]))
+                for coordinates in POIs:
+                    cv2.circle(self.frame, coordinates, 5, (255, 0, 255), 1, cv2.LINE_AA)
+
+            if results_hand.multi_hand_landmarks and self.mode == Modes.SHOWCASE:
+                for hand_landmarks in results_hand.multi_hand_landmarks:
+                    self.mp_drawing.draw_landmarks(
+                        self.frame, hand_landmarks, self.mp_hands.HAND_CONNECTIONS)
+            cv2.line(self.frame, p1, p2, (255, 0, 0), 2)
+            cv2.imshow('Head Pose Estimation', self.frame)
+
 
 if __name__ == "__main__":
-    concentration_detection = ConcentrationDetection(Modes.SHOWCASE)
-    while True:
-        concentration_detection.run()
-        if cv2.waitKey(5) & 0xFF == 27:
-            break
+    concentration_detection = ConcentrationDetection(Modes.SHOWCASE, 1)
+    concentration_detection.showcase()
+    # while True:
+    #     concentration_detection.run()
+    #     if cv2.waitKey(5) & 0xFF == 27:
+    #         break
