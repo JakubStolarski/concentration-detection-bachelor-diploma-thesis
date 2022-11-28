@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>First Flask App</title>
+</head>
+<style>
+  h1 {text-align: center;}
+</style>
+
+<body>
+    <div class="container">
+    <div class="row">
+        <div class="col-lg-8  offset-lg-2">
+            <h3 class="mt-5">Live Streaming</h3>
+            <img src="{{ url_for('video_feed') }}" width="100%">
+        </div>
+    </div>
+    <h1>{% block title %} Showcase{% endblock %}</h1>
+    <form name="InputSelect" method="post">
+        <label>Camera ID</label>
+        <br>
+        <input type="number" step="1" name="Camera ID"
+               placeholder="0" min = "0"
+               value="{{ request.form['Camera ID'] }}"></input>
+        <br><br>
+         <a href=show_video><button type="submit">Submit</button>
+    </form>
+
+
+</body>
+</html>

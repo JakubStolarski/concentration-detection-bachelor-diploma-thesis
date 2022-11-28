@@ -78,5 +78,14 @@ def video_feed():
     return Response(configure_concentration_detection(concentration_detection), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
+@app.route('/showcase', methods=['GET', "POST"])
+def showcase():
+    global input_values
+    if request.method == 'POST':
+        input_values.values[InputNames.Camera_ID], input_values.values[InputNames.Mode] \
+            = int(request.form[InputNames.Camera_ID]), 3
+    return render_template('showcase.html')
+
+
 if __name__ == "__main__":
     app.run(debug=True)

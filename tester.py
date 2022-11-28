@@ -15,7 +15,7 @@ class Modes(IntEnum):
     CALIBRATION = 0
     BASIC = 1
     VIDEO_ANALYSIS = 2
-    SHOWCASE = 4
+    SHOWCASE = 3
 
 
 class Landmarks(IntEnum):

@@ -8,18 +8,38 @@
   h1 {text-align: center;}
 </style>
 <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.js"></script>
+<!--<script src="{{url_for('static', filename='input_and_video_managemet.js')}}"></script>-->
 <script type="text/javascript">
-    function yesnoCheck() {
-        var x = document.getElementById('Mode').value;
+function yesnoCheck() {
+    var x = document.getElementById("ModeSelect").value;
 
-        if (x == '3') {
-            document.getElementById('IfYes').style.display = 'block';
-        }
-        else {
-            document.getElementById('IfYes').style.display = 'none';
-        }
+    if (x == 'Video') {
+        document.getElementById('IfYes').style.display = 'block';
     }
-        setInterval('yesnoCheck()', 500);
+    else {
+        document.getElementById('IfYes').style.display = 'none';
+    }
+}
+setInterval('yesnoCheck()', 500);
+
+function select_to_input() {
+    var x = document.getElementById("ModeSelect").value;
+    switch (x) {
+        case "Configuration":
+            document.getElementById('Mode').value = '0'
+        case "Run":
+            document.getElementById('Mode').value = '1'
+        case "Video":
+            document.getElementById('Mode').value = '2'
+        case "Showcase":
+            document.getElementById('Mode').value = '3'
+    }
+}
+
+function open_video() {
+    document.getElementById("streaming").style.display = 'block';
+}
+
 
 </script>
 <body onload="javascript: yesnoCheck()">
@@ -27,15 +47,22 @@
     <form name="InputSelect" method="post">
         <label>Mode</label>
         <br>
-
-        <input type="number" step="1" name="Mode" id="Mode"
-               placeholder="0" min = "0" max = "4"
-               value="{{ request.form['Mode'] }}"></input>
-
-        <div id="IfYes" style="display:none;">
-            <br>
+        <div style="display:none;">
+            <input name="Mode" id="Mode"
+                   type = "number" value="{{ request.form['Mode'] }}">
+        </div>
+        <select name="ModeSelect" id="ModeSelect" onchange="select_to_input()">
+            <option value="">--Please choose an option--</option>
+            <option value="Configuration">Configuration</option>
+            <option value="Run">Run</option>
+            <option value="Video">Video</option>
+            <option value="Showcase">Showcase</option>
+        </select>
+        <div id="IfYes" style="display:none">
             <input type="file" accept="video/*">
         </div>
+
+        <br>
         <br>
 
         <label>Camera ID</label>
@@ -43,6 +70,8 @@
         <input type="number" step="1" name="Camera ID"
                placeholder="0" min = "0"
                value="{{ request.form['Camera ID'] }}"></input>
+
+        <br>
         <br>
 
         <label>Distraction Time</label>
@@ -51,12 +80,14 @@
                placeholder="30" min = "0"
                value="{{ request.form['Distraction Time'] }}"></input>
         <br>
+        <br>
 
         <label>Detection Confidence</label>
         <br>
         <input type="number" step="0.1" name="Detection Confidence"
                placeholder="0.5"  min = "0" max = "1"
                value="{{ request.form['Detection Confidence'] }}"></input>
+        <br>
         <br>
 
         <label>Tracking Confidence</label>
@@ -65,16 +96,18 @@
                placeholder="0.5" min = "0" max = "1"
                value="{{ request.form['Tracking Confidence'] }}"></input>
         <br>
-
-        <button type="submit">Submit</button>
+        <br>
+        <button onclick="open_video()"> hej </button>
+        <button type="submit" onclick="open_video()">Submit</button>
     </form>
 
-    <div class="container">
+    <div class="container" id="streaming" >
     <div class="row">
         <div class="col-lg-8  offset-lg-2">
             <h3 class="mt-5">Live Streaming</h3>
             <img src="{{ url_for('video_feed') }}" width="100%">
         </div>
+    </div>
     </div>
 </body>
 </html>
