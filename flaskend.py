@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, Response
 import tester
-from enum import Enum
 
 
 class NoInput(Exception):
@@ -8,35 +7,30 @@ class NoInput(Exception):
     pass
 
 
-class InputNames(str, Enum):
-    Mode = "Mode",
-    Camera_ID = "Camera ID",
-    Distraction_Time = "Distraction Time",
-    Detection_Confidence = "Detection Confidence",
-    Tracking_Confidence = "Tracking Confidence"
-
-
 class InputValues:
     def __init__(self):
         self.values = {
-            InputNames.Mode: 1,
-            InputNames.Camera_ID: 0,
-            InputNames.Distraction_Time: 5,
-            InputNames.Detection_Confidence: 0.5,
-            InputNames.Tracking_Confidence: 0.5
+            tester.InputNames.Mode: 1,
+            tester.InputNames.Camera_ID: 0,
+            tester.InputNames.Distraction_Time: 5,
+            tester.InputNames.Detection_Confidence: 0.5,
+            tester.InputNames.Tracking_Confidence: 0.5
         }
         self.frame = None
 
 
 input_values = InputValues()
-
+concentration_detection = tester.ConcentrationDetection()
 app = Flask(__name__, template_folder='templates')
 
 
 def configure_concentration_detection(concentration_detection):
 
     while True:
-        concentration_detection.run()
+        if concentration_detection.mode == tester.Modes.SHOWCASE:
+            concentration_detection.showcase()
+        else:
+            concentration_detection.run()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + concentration_detection.frame + b'\r\n\r\n')
 
@@ -69,12 +63,9 @@ def info():
 
 @app.route('/video_feed')
 def video_feed():
-    global input_values
-    concentration_detection = tester.ConcentrationDetection(input_values.values[InputNames.Mode],
-                                                            input_values.values[InputNames.Camera_ID],
-                                                            input_values.values[InputNames.Distraction_Time],
-                                                            input_values.values[InputNames.Detection_Confidence],
-                                                            input_values.values[InputNames.Tracking_Confidence])
+    global input_values, concentration_detection
+    concentration_detection.set_input_data(input_values)
+
     return Response(configure_concentration_detection(concentration_detection), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
@@ -82,8 +73,8 @@ def video_feed():
 def showcase():
     global input_values
     if request.method == 'POST':
-        input_values.values[InputNames.Camera_ID], input_values.values[InputNames.Mode] \
-            = int(request.form[InputNames.Camera_ID]), 3
+        input_values.values[tester.InputNames.Camera_ID], input_values.values[tester.InputNames.Mode] \
+            = int(request.form[tester.InputNames.Camera_ID]), 3
     return render_template('showcase.html')
 
 

@@ -4,8 +4,21 @@
     <meta charset="UTF-8">
     <title>First Flask App</title>
 </head>
+
 <style>
   h1 {text-align: center;}
+  .flex-container {
+    display: flex;
+    }
+  .menu {
+  position:absolute;
+  left: 25px;
+  }
+  .container {
+   margin: auto;
+   width: 50%;
+   padding: 10px;
+  }
 </style>
 <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.js"></script>
 <!--<script src="{{url_for('static', filename='input_and_video_managemet.js')}}"></script>-->
@@ -27,23 +40,34 @@ function select_to_input() {
     switch (x) {
         case "Configuration":
             document.getElementById('Mode').value = '0'
+            break;
         case "Run":
             document.getElementById('Mode').value = '1'
+            break;
         case "Video":
             document.getElementById('Mode').value = '2'
+            break;
         case "Showcase":
             document.getElementById('Mode').value = '3'
+            break;
     }
 }
 
 function open_video() {
-    document.getElementById("streaming").style.display = 'block';
+ var x = document.forms["InputSelect"]["Camera ID"].value
+    if (x) {
+      document.getElementById("streaming").style.display = 'block';
+    }
 }
 
-
 </script>
-<body onload="javascript: yesnoCheck()">
+
+<body onload="javascript: yesnoCheck(); open_video();">
     <h1>{% block title %} Configuration Menu {% endblock %}</h1>
+    <br>
+    <div class="flex-container">
+
+    <div class = menu">
     <form name="InputSelect" method="post">
         <label>Mode</label>
         <br>
@@ -97,11 +121,12 @@ function open_video() {
                value="{{ request.form['Tracking Confidence'] }}"></input>
         <br>
         <br>
-        <button onclick="open_video()"> hej </button>
+
         <button type="submit" onclick="open_video()">Submit</button>
     </form>
+    </div>
 
-    <div class="container" id="streaming" >
+    <div class="container" id="streaming" style="display:none">
     <div class="row">
         <div class="col-lg-8  offset-lg-2">
             <h3 class="mt-5">Live Streaming</h3>
@@ -109,5 +134,8 @@ function open_video() {
         </div>
     </div>
     </div>
+
+    </div>
+
 </body>
 </html>

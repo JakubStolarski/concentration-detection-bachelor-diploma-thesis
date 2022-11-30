@@ -7,24 +7,37 @@
 <style>
   h1 {text-align: center;}
 </style>
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.js"></script>
+<!--<script src="{{url_for('static', filename='input_and_video_managemet.js')}}"></script>-->
+<script type="text/javascript">
 
-<body>
-    <div class="container">
+function open_video() {
+ var x = document.forms["InputSelect"]["Camera ID"].value
+    if (x) {
+      document.getElementById("streaming").style.display = 'block';
+    }
+}
+
+
+</script>
+<body onload="javascript: open_video()">
+    <h1>{% block title %} Showcase {% endblock %}</h1>
+    <div class="container" id='streaming'  style="display:none;">
     <div class="row">
         <div class="col-lg-8  offset-lg-2">
             <h3 class="mt-5">Live Streaming</h3>
             <img src="{{ url_for('video_feed') }}" width="100%">
         </div>
     </div>
-    <h1>{% block title %} Showcase{% endblock %}</h1>
+    </div>
     <form name="InputSelect" method="post">
         <label>Camera ID</label>
         <br>
-        <input type="number" step="1" name="Camera ID"
-               placeholder="0" min = "0"
+        <input type='number' step="1" name="Camera ID"
+               placeholder="ID" min = "0"
                value="{{ request.form['Camera ID'] }}"></input>
         <br><br>
-         <a href=show_video><button type="submit">Submit</button>
+         <button type="submit" >Submit</button>
     </form>
 
 

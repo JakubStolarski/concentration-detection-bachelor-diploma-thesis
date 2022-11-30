@@ -1,5 +1,5 @@
 import cv2
-from enum import IntEnum
+from enum import Enum, IntEnum
 import easygui as e
 import mediapipe as mp
 import numpy as np
@@ -9,6 +9,14 @@ import time
 class DetectionError(Exception):
     # Raised when neural network failed to detect face/hand
     pass
+
+
+class InputNames(str, Enum):
+    Mode = "Mode",
+    Camera_ID = "Camera ID",
+    Distraction_Time = "Distraction Time",
+    Detection_Confidence = "Detection Confidence",
+    Tracking_Confidence = "Tracking Confidence"
 
 
 class Modes(IntEnum):
@@ -37,7 +45,7 @@ class Hand(IntEnum):
 
 
 class ConcentrationDetection:
-    def __init__(self, mode, camera_id=0, distraction_tolerance=5, detection_confidence=0.5, tracking_confidence=0.5):
+    def __init__(self, mode=0, camera_id=0, distraction_tolerance=5, detection_confidence=0.5, tracking_confidence=0.5):
         self._activate_mp_solutions(detection_confidence, tracking_confidence)
         self._set_initial_boundaries()
         self.starter_time = time.time()
@@ -45,6 +53,8 @@ class ConcentrationDetection:
         self.mode = mode
         self.camera_id = camera_id
         self.distraction_tolerance = distraction_tolerance
+        self.detection_confidence = detection_confidence
+        self.tracking_confidence = tracking_confidence
         self.frame = None
         self.run_initialized = False
         self.curr_alarm_time = self.start_alarm_time = None
@@ -67,6 +77,14 @@ class ConcentrationDetection:
         # workspace structure is an array of two arrays, first of which consist of lower
         self.bound_workspace = np.multiply(boundaries_shape, initial_boundaries_limit)
         self.mp_drawing = mp.solutions.drawing_utils
+
+    def set_input_data(self, input_values):
+        self.mode = input_values.values[InputNames.Mode]
+        self.camera_id = input_values.values[InputNames.Camera_ID]
+        self.distraction_tolerance = input_values.values[InputNames.Distraction_Time]
+        self.detection_confidence = input_values.values[InputNames.Detection_Confidence]
+        self.tracking_confidence = input_values.values[InputNames.Tracking_Confidence]
+        self.run_initialized = False
 
     @staticmethod
     def orientation(coordinate_landmark_0, coordinate_landmark_9):
@@ -196,6 +214,7 @@ class ConcentrationDetection:
 
     def _initialize(self):
         self.cap = cv2.VideoCapture(self.camera_id)
+        self.starter_time = time.time()
 
     def run(self):
         if not self.run_initialized:
@@ -264,45 +283,48 @@ class ConcentrationDetection:
         self.frame = jpeg.tobytes()
 
     def showcase(self):
-        while True:
-            if not self.run_initialized:
-                self._initialize()
-                self.run_initialized = True
+        # while True:
+        if not self.run_initialized:
+            self._initialize()
+            self.run_initialized = True
 
-            vid, self.frame = self.cap.read()
-            img_h, img_w = self.frame.shape[:2]
-            is_ok, results_hand, results_face, p1, p2, x, y, z = self._frame_operations()
+        vid, self.frame = self.cap.read()
+        img_h, img_w = self.frame.shape[:2]
+        is_ok, results_hand, results_face, p1, p2, x, y, z = self._frame_operations()
 
-            if results_face.multi_face_landmarks:
-                mesh_points = np.array([np.multiply([point.x, point.y], [img_w, img_h]).astype(int)
-                                        for point in results_face.multi_face_landmarks[0].landmark])
-                POIs = []
-                for landmark in [Landmarks.NOSE_TIP, Landmarks.RIGHT_EYE, Landmarks.RIGHT_MOUTH,
-                                 Landmarks.CHIN, Landmarks.LEFT_EYE, Landmarks.LEFT_MOUTH]:
-                    POIs.append((mesh_points[landmark]))
-                for coordinates in POIs:
-                    cv2.circle(self.frame, coordinates, 5, (255, 0, 255), 1, cv2.LINE_AA)
+        if results_face.multi_face_landmarks:
+            mesh_points = np.array([np.multiply([point.x, point.y], [img_w, img_h]).astype(int)
+                                    for point in results_face.multi_face_landmarks[0].landmark])
+            POIs = []
+            for landmark in [Landmarks.NOSE_TIP, Landmarks.RIGHT_EYE, Landmarks.RIGHT_MOUTH,
+                             Landmarks.CHIN, Landmarks.LEFT_EYE, Landmarks.LEFT_MOUTH]:
+                POIs.append((mesh_points[landmark]))
+            for coordinates in POIs:
+                cv2.circle(self.frame, coordinates, 5, (255, 0, 255), 1, cv2.LINE_AA)
 
-            if results_hand.multi_hand_landmarks and self.mode == Modes.SHOWCASE:
-                for hand_landmarks in results_hand.multi_hand_landmarks:
-                    self.mp_drawing.draw_landmarks(
-                        self.frame, hand_landmarks, self.mp_hands.HAND_CONNECTIONS)
+        if results_hand.multi_hand_landmarks and self.mode == Modes.SHOWCASE:
+            for hand_landmarks in results_hand.multi_hand_landmarks:
+                self.mp_drawing.draw_landmarks(
+                    self.frame, hand_landmarks, self.mp_hands.HAND_CONNECTIONS)
 
-            if is_ok:
-                cv2.putText(self.frame, "Okay!!", (int(self.frame.shape[1] * 0.7), int(self.frame.shape[0] * 0.85)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        if is_ok:
+            cv2.putText(self.frame, "Okay!!", (int(self.frame.shape[1] * 0.7), int(self.frame.shape[0] * 0.85)),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
-            running_time = "--- %s seconds ---" % round((time.time() - self.starter_time), 2)
-            # show how much time passed
-            cv2.putText(self.frame, running_time, (int(self.frame.shape[1] * 0.1), int(self.frame.shape[0] * 0.8)),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1)
+        running_time = "--- %s seconds ---" % round((time.time() - self.starter_time), 2)
+        # show how much time passed
+        cv2.putText(self.frame, running_time, (int(self.frame.shape[1] * 0.1), int(self.frame.shape[0] * 0.8)),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1)
 
-            cv2.line(self.frame, p1, p2, (255, 0, 0), 2)
-            cv2.imshow('Showcase', self.frame)
-            if cv2.waitKey(5) & 0xFF == 27:
-                break
-        self.cap.release()
-        cv2.destroyAllWindows()
+        cv2.line(self.frame, p1, p2, (255, 0, 0), 2)
+        ret, jpeg = cv2.imencode('.jpg', self.frame)
+
+        self.frame = jpeg.tobytes()
+            # cv2.imshow('Showcase', self.frame)
+        #     if cv2.waitKey(5) & 0xFF == 27:
+        #         break
+        # self.cap.release()
+        # cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
