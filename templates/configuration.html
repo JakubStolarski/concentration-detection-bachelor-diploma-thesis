@@ -6,19 +6,65 @@
 </head>
 
 <style>
-  h1 {text-align: center;}
+    body {
+      background-color: rgb(20, 20, 20);
+      margin: 0px;
+    }
+
+  h1 {
+  text-align: center;
+   color: white;
+   font-size: 2.5em;
+  }
   .flex-container {
     display: flex;
+
     }
   .menu {
   position:absolute;
-  left: 25px;
+  left: 1.5em;
   }
+  .menu-items {
+  margin-left: 2rem;
+  position: absolute;
+  z-index: 2;
+    }
   .container {
    margin: auto;
-   width: 50%;
+   width: 50vw;
    padding: 10px;
   }
+  #menu-background-pattern {
+  background-image: radial-gradient(
+    rgba(255, 255, 255, 0.1) 9%,
+    transparent 20%
+  );
+   background-position: 0% 0%;
+  background-size: 12vmin 12vmin;
+  height: 100vh;
+  left: 0px;
+  position: absolute;
+  top: 0px;
+  width: 100vw;
+  z-index: 1;
+}
+
+.menu-item {
+  color: white;
+  display: block;
+  font-family: 'Ibarra Real Nova', serif;
+  font-size: 1.75em;
+}
+.stream {
+  color: white;
+  display: block;
+  font-family: 'Ibarra Real Nova', serif;
+  font-size: 1.75em;
+}
+.input {
+height: 1.75em;
+font-size: 1em;
+}
 </style>
 <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.js"></script>
 <!--<script src="{{url_for('static', filename='input_and_video_managemet.js')}}"></script>-->
@@ -67,9 +113,10 @@ function open_video() {
     <br>
     <div class="flex-container">
 
-    <div class = menu">
+    <div class = "menu">
+        <div class = "menu-items">
         <form name="InputSelect" method="post">
-            <label>Mode</label>
+            <label class = "menu-item" >Mode</label>
             <br>
             <div style="display:none;">
 
@@ -78,7 +125,7 @@ function open_video() {
 
             </div>
 
-            <select name="ModeSelect" id="ModeSelect" onchange="select_to_input()">
+            <select name="ModeSelect" id="ModeSelect" onchange="select_to_input()" class="input">
 
                 <option value="">--Please choose an option--</option>
                 <option value="Configuration">Configuration</option>
@@ -88,60 +135,61 @@ function open_video() {
 
             </select>
 
-            <div id="IfYes" style="display:none">
+            <div id="IfYes" class = "menu-item" style="display:none">
 
-                <input type="file" accept="video/*">
+                <input type="file" class="input" accept="video/*">
 
             </div>
 
             <br>
             <br>
 
-            <label>Camera ID</label>
+            <label class = "menu-item" >Camera ID</label>
             <br>
-            <input type="number" step="1" name="Camera ID"
+            <input type="number" step="1" name="Camera ID" class="input"
                    placeholder="0" min = "0"
                    value="{{ request.form['Camera ID'] }}"></input>
 
             <br>
             <br>
 
-            <label>Distraction Time</label>
+            <label class = "menu-item">Distraction Time</label>
             <br>
-            <input type="number" step="1" name="Distraction Time"
+            <input type="number" step="1" name="Distraction Time" class="input"
                    placeholder="30" min = "0"
                    value="{{ request.form['Distraction Time'] }}"></input>
 
             <br>
             <br>
 
-            <label>Detection Confidence</label>
+            <label class = "menu-item" >Detection Confidence</label>
             <br>
-            <input type="number" step="0.1" name="Detection Confidence"
+            <input type="number" step="0.1" name="Detection Confidence" class="input"
                    placeholder="0.5"  min = "0" max = "1"
                    value="{{ request.form['Detection Confidence'] }}"></input>
 
             <br>
             <br>
 
-            <label>Tracking Confidence</label>
+            <label class = "menu-item"  >Tracking Confidence</label>
             <br>
-            <input type="number" step="0.1" name="Tracking Confidence"
+            <input type="number" step="0.1" name="Tracking Confidence" class="input"
                    placeholder="0.5" min = "0" max = "1"
                    value="{{ request.form['Tracking Confidence'] }}"></input>
 
             <br>
             <br>
-
-            <button type="submit" onclick="open_video()">Submit</button>
+            <br>
+            <button type="submit" onclick="open_video()" style="width:2.25;height:1.75em;font-size:1.25em;">Submit</button>
         </form>
+        </div>
     </div>
-
+    <div id="menu-background-pattern"></div>
     <div class="container" id="streaming" style="display:none">
     <div class="row">
         <div class="col-lg-8  offset-lg-2">
-            <h3 class="mt-5">Live Streaming</h3>
-            <img src="{{ url_for('video_feed') }}" width="100%">
+            <h3 class="stream">Live Streaming</h3>
+            <img src="{{ url_for('video_feed') }}" width="100%" opacity = "1.0" >
         </div>
     </div>
     </div>
