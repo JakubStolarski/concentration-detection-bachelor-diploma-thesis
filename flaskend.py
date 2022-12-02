@@ -10,7 +10,7 @@ class NoInput(Exception):
 class InputValues:
     def __init__(self):
         self.values = {
-            tester.InputNames.Mode: 1,
+            tester.InputNames.Mode: None,
             tester.InputNames.Camera_ID: 0,
             tester.InputNames.Distraction_Time: 5,
             tester.InputNames.Detection_Confidence: 0.5,
@@ -25,14 +25,17 @@ app = Flask(__name__, template_folder='templates')
 
 
 def configure_concentration_detection(concentration_detection):
-
     while True:
-        if concentration_detection.mode == tester.Modes.SHOWCASE:
-            concentration_detection.showcase()
+        if concentration_detection.mode is not None:
+            if concentration_detection.mode == tester.Modes.SHOWCASE:
+                concentration_detection.showcase()
+            else:
+                concentration_detection.run()
         else:
-            concentration_detection.run()
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + concentration_detection.frame + b'\r\n\r\n')
+            pass
+        # if no frame was captured return single byte
+        yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n'
+               + concentration_detection.frame + b'\r\n\r\n') if concentration_detection.frame else bytes()
 
 
 @app.route('/')
@@ -61,14 +64,6 @@ def info():
     return render_template('info.html')
 
 
-@app.route('/video_feed')
-def video_feed():
-    global input_values, concentration_detection
-    concentration_detection.set_input_data(input_values)
-
-    return Response(configure_concentration_detection(concentration_detection), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-
 @app.route('/showcase', methods=['GET', "POST"])
 def showcase():
     global input_values
@@ -76,6 +71,14 @@ def showcase():
         input_values.values[tester.InputNames.Camera_ID], input_values.values[tester.InputNames.Mode] \
             = int(request.form[tester.InputNames.Camera_ID]), 3
     return render_template('showcase.html')
+
+
+@app.route('/video_feed')
+def video_feed():
+    global input_values, concentration_detection
+    concentration_detection.set_input_data(input_values)
+
+    return Response(configure_concentration_detection(concentration_detection), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 if __name__ == "__main__":
