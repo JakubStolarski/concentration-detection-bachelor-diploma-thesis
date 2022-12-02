@@ -68,62 +68,73 @@ function open_video() {
     <div class="flex-container">
 
     <div class = menu">
-    <form name="InputSelect" method="post">
-        <label>Mode</label>
-        <br>
-        <div style="display:none;">
-            <input name="Mode" id="Mode"
-                   type = "number" value="{{ request.form['Mode'] }}">
-        </div>
-        <select name="ModeSelect" id="ModeSelect" onchange="select_to_input()">
-            <option value="">--Please choose an option--</option>
-            <option value="Configuration">Configuration</option>
-            <option value="Run">Run</option>
-            <option value="Video">Video</option>
-            <option value="Showcase">Showcase</option>
-        </select>
-        <div id="IfYes" style="display:none">
-            <input type="file" accept="video/*">
-        </div>
+        <form name="InputSelect" method="post">
+            <label>Mode</label>
+            <br>
+            <div style="display:none;">
 
-        <br>
-        <br>
+                <input name="Mode" id="Mode"
+                       type = "number" value="{{ request.form['Mode'] }}">
 
-        <label>Camera ID</label>
-        <br>
-        <input type="number" step="1" name="Camera ID"
-               placeholder="0" min = "0"
-               value="{{ request.form['Camera ID'] }}"></input>
+            </div>
 
-        <br>
-        <br>
+            <select name="ModeSelect" id="ModeSelect" onchange="select_to_input()">
 
-        <label>Distraction Time</label>
-        <br>
-        <input type="number" step="1" name="Distraction Time"
-               placeholder="30" min = "0"
-               value="{{ request.form['Distraction Time'] }}"></input>
-        <br>
-        <br>
+                <option value="">--Please choose an option--</option>
+                <option value="Configuration">Configuration</option>
+                <option value="Run">Run</option>
+                <option value="Video">Video</option>
+                <option value="Showcase">Showcase</option>
 
-        <label>Detection Confidence</label>
-        <br>
-        <input type="number" step="0.1" name="Detection Confidence"
-               placeholder="0.5"  min = "0" max = "1"
-               value="{{ request.form['Detection Confidence'] }}"></input>
-        <br>
-        <br>
+            </select>
 
-        <label>Tracking Confidence</label>
-        <br>
-        <input type="number" step="0.1" name="Tracking Confidence"
-               placeholder="0.5" min = "0" max = "1"
-               value="{{ request.form['Tracking Confidence'] }}"></input>
-        <br>
-        <br>
+            <div id="IfYes" style="display:none">
 
-        <button type="submit" onclick="open_video()">Submit</button>
-    </form>
+                <input type="file" accept="video/*">
+
+            </div>
+
+            <br>
+            <br>
+
+            <label>Camera ID</label>
+            <br>
+            <input type="number" step="1" name="Camera ID"
+                   placeholder="0" min = "0"
+                   value="{{ request.form['Camera ID'] }}"></input>
+
+            <br>
+            <br>
+
+            <label>Distraction Time</label>
+            <br>
+            <input type="number" step="1" name="Distraction Time"
+                   placeholder="30" min = "0"
+                   value="{{ request.form['Distraction Time'] }}"></input>
+
+            <br>
+            <br>
+
+            <label>Detection Confidence</label>
+            <br>
+            <input type="number" step="0.1" name="Detection Confidence"
+                   placeholder="0.5"  min = "0" max = "1"
+                   value="{{ request.form['Detection Confidence'] }}"></input>
+
+            <br>
+            <br>
+
+            <label>Tracking Confidence</label>
+            <br>
+            <input type="number" step="0.1" name="Tracking Confidence"
+                   placeholder="0.5" min = "0" max = "1"
+                   value="{{ request.form['Tracking Confidence'] }}"></input>
+
+            <br>
+            <br>
+
+            <button type="submit" onclick="open_video()">Submit</button>
+        </form>
     </div>
 
     <div class="container" id="streaming" style="display:none">

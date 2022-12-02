@@ -6,6 +6,15 @@
 </head>
 <style>
   h1 {text-align: center;}
+  .menu {
+  position:absolute;
+  left: 25px;
+  }
+  .container {
+   margin: auto;
+   width: 50%;
+   padding: 10px;
+  }
 </style>
 <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.js"></script>
 <!--<script src="{{url_for('static', filename='input_and_video_managemet.js')}}"></script>-->
@@ -22,23 +31,31 @@ function open_video() {
 </script>
 <body onload="javascript: open_video()">
     <h1>{% block title %} Showcase {% endblock %}</h1>
-    <div class="container" id='streaming'  style="display:none;">
-    <div class="row">
-        <div class="col-lg-8  offset-lg-2">
-            <h3 class="mt-5">Live Streaming</h3>
-            <img src="{{ url_for('video_feed') }}" width="100%">
+    <br><br>
+    <div class="flex-container">
+        <div class="menu">
+            <form name="InputSelect" method="post">
+                <label>Camera ID</label>
+                <br>
+                <input type='number' step="1" name="Camera ID"
+                       placeholder="ID" min = "0"
+                       value="{{ request.form['Camera ID'] }}"></input>
+                <script type="text/javascript">
+                    document.getElementById('Camera ID').value = "<?php echo $_GET['Camera ID'];?>";
+                </script>
+                <br><br>
+                 <button type="submit">Submit</button>
+            </form>
+        </div>
+        <div class="container" id='streaming'  style="display:none;">
+            <div class="row">
+                <div class="col-lg-8  offset-lg-2">
+                    <h3 class="mt-5">Live Streaming</h3>
+                    <img src="{{ url_for('video_feed') }}" width="100%">
+                </div>
+            </div>
         </div>
     </div>
-    </div>
-    <form name="InputSelect" method="post">
-        <label>Camera ID</label>
-        <br>
-        <input type='number' step="1" name="Camera ID"
-               placeholder="ID" min = "0"
-               value="{{ request.form['Camera ID'] }}"></input>
-        <br><br>
-         <button type="submit" >Submit</button>
-    </form>
 
 
 </body>
