@@ -1,6 +1,8 @@
 import cv2
 from enum import Enum, IntEnum
 import easygui as e
+from json import JSONEncoder
+import json
 import mediapipe as mp
 import numpy as np
 import time
@@ -155,7 +157,7 @@ class ConcentrationDetection:
                                        [0, focal_length, img_w / 2],
                                        [0, 0, 1]])
 
-                # The Distance Matrix
+                # With assumption that there is no lens distortion
                 dist_matrix = np.zeros((4, 1), dtype=np.float64)
 
                 # Solve PnP
@@ -216,6 +218,17 @@ class ConcentrationDetection:
         self.cap = cv2.VideoCapture(self.camera_id)
         self.starter_time = time.time()
 
+    def save_workspace(self):
+        saved_workspace = self.bound_workspace.tolist()
+        with open('saved_workspace.json', 'w') as file:
+            json.dump(saved_workspace, file)
+
+    def read_workspace(self, saved_workspace):
+        self.bound_workspace = saved_workspace
+        if self.bounds < 4:
+            self.bounds = 4
+        stop = 1
+
     def run(self):
         if not self.run_initialized:
             self._initialize()
@@ -249,7 +262,7 @@ class ConcentrationDetection:
                                     self.alarm_flag = False
 
             if self.bounds > 3:
-                alarm_flag = True
+                alarm_flag = True  #todo solve doubling of alarm_flag and self.alarm_flag (wtf is this spaghetti even)
                 if results_face.multi_face_landmarks:
                     if self.bound_workspace[0][0] < x < self.bound_workspace[1][0]:
                         # todo add funtion for checking if workspace is set
@@ -271,8 +284,8 @@ class ConcentrationDetection:
                 else:
                     self.curr_alarm_time = self.start_alarm_time = None
 
+            #cv2.imshow('Showcase', self.frame)
             ret, jpeg = cv2.imencode('.jpg', self.frame)
-
             self.frame = jpeg.tobytes()
 
     def showcase(self):
@@ -322,8 +335,14 @@ class ConcentrationDetection:
 
 
 if __name__ == "__main__":
-    concentration_detection = ConcentrationDetection(Modes.SHOWCASE, 1)
-    concentration_detection.showcase()
+    concentration_detection = ConcentrationDetection(Modes.CALIBRATION, 1)
+    while True:
+        concentration_detection.run()
+        if cv2.waitKey(5) == ord('a'):
+            concentration_detection.read_workspace(saved_workspace_file='saved_workspace.json')
+        if cv2.waitKey(5) & 0xFF == 27:
+            concentration_detection.save_workspace()
+            break
     # while True:
     #     concentration_detection.run()
     #     if cv2.waitKey(5) & 0xFF == 27:

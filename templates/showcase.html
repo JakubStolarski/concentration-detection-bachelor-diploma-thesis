@@ -5,16 +5,57 @@
     <title>First Flask App</title>
 </head>
 <style>
-  h1 {text-align: center;}
-  .menu {
-  position:absolute;
-  left: 25px;
+     body {
+      background-color: rgb(20, 20, 20);
+      margin: 0px;
+    }
+  h1 {text-align: center;
+   color: white;
+   font-size: 2.5em;
   }
+  .center {text-align: center;}
+    .menu {
+  position:absolute;
+  left: 1.5em;
+  }
+  .menu-items {
+  margin-left: 2rem;
+  position: absolute;
+  z-index: 2;
+    }
+    .menu-item {
+  color: white;
+  display: block;
+  font-family: 'Ibarra Real Nova', serif;
+  font-size: 1.75em;
+}
   .container {
    margin: auto;
-   width: 50%;
+   width: 50vw;
    padding: 10px;
   }
+    .flex-container {
+    display: flex;
+
+    }
+   #menu-background-pattern {
+  background-image: radial-gradient(
+    rgba(255, 255, 255, 0.1) 9%,
+    transparent 10%
+  );
+   background-position: 0% 0%;
+  background-size: 10vmin 10vmin;
+  height: 100vh;
+  left: 0px;
+  position: absolute;
+  top: 0px;
+  width: 100vw;
+  z-index: -1;
+}
+.input {
+height: 1.75em;
+font-size: 1em;
+}
 </style>
 <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.js"></script>
 <!--<script src="{{url_for('static', filename='input_and_video_managemet.js')}}"></script>-->
@@ -35,16 +76,16 @@ function open_video() {
     <div class="flex-container">
         <div class="menu">
             <form name="InputSelect" method="post">
-                <label>Camera ID</label>
+                <label class="menu-item">Camera ID</label>
                 <br>
-                <input type='number' step="1" name="Camera ID"
+                <input type='number' step="1" name="Camera ID" class="input"
                        placeholder="ID" min = "0"
                        value="{{ request.form['Camera ID'] }}"></input>
                 <script type="text/javascript">
                     document.getElementById('Camera ID').value = "<?php echo $_GET['Camera ID'];?>";
                 </script>
                 <br><br>
-                 <button type="submit">Submit</button>
+                 <button type="submit" style="width:2.25;height:1.75em;font-size:1.25em;">Submit</button>
             </form>
         </div>
         <div class="container" id='streaming'  style="display:none;">
@@ -55,6 +96,7 @@ function open_video() {
                 </div>
             </div>
         </div>
+        <div id="menu-background-pattern"></div>
     </div>
 
 
