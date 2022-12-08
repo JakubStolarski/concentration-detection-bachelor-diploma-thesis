@@ -57,15 +57,6 @@ def run():
             df = pd.read_json(data)
             input_values.workspace = df.values
 
-        # data = None
-        # workspace_file = request.files["workspace"]
-        # loaded_workspace = workspace_file.read()
-        # a = int.from_bytes(loaded_workspace[0], "big")
-        # helper = int.from_bytes(loaded_workspace, "big")
-        # loaded_workspace = request.get_json()
-        # with open(workspace_file, 'w') as f:
-        #     json.dump(data, f)
-
         for input_key in input_values.values:
             try:
                 if input_key in ['Mode', 'Camera ID']:
