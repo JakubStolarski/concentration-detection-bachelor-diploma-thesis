@@ -1,10 +1,9 @@
-flask==1.1.4
+flask==2.2.2
 mediapipe==0.8.11
 numpy==1.23.2
-opencv-contrib-python
 screeninfo==0.8.1
-deepface==0.0.75
 tensorflow==2.10.0
 matplotlib==3.5.3
+pandas==1.4.3
 Pillow==9.2.0
 easygui==0.98.3
