@@ -1,5 +1,5 @@
 import flask
-from flask import Flask, render_template, request, Response
+from flask import Flask, redirect, render_template, request, Response, url_for
 import pandas as pd
 import tester
 
@@ -22,8 +22,15 @@ class InputValues:
         self.workspace = None
 
 
-input_values = InputValues()
-concentration_detection = tester.ConcentrationDetection()
+input_values = concentration_detection = None
+
+
+def base_state():
+    global input_values, concentration_detection
+    input_values = InputValues()
+    concentration_detection = tester.ConcentrationDetection()
+
+
 app = Flask(__name__, template_folder='templates')
 
 
@@ -38,13 +45,14 @@ def configure_concentration_detection(concentration_detection):
                 concentration_detection.run()
         else:
             pass
-        # if no frame was captured return single byte
+        # if no frame was captured return a single byte
         yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n'
                + concentration_detection.frame + b'\r\n\r\n') if concentration_detection.frame else bytes()
 
 
 @app.route('/')
 def index():
+    base_state()
     return render_template('index.html')
 
 
@@ -89,6 +97,12 @@ def video_feed():
     concentration_detection.set_input_data(input_values)
 
     return Response(configure_concentration_detection(concentration_detection), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+@app.route('/save_and_quit')
+def save_and_quit():
+    concentration_detection.save_workspace()
+    return redirect(url_for('index'))
 
 
 if __name__ == "__main__":

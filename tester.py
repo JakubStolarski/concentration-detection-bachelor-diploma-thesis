@@ -262,15 +262,15 @@ class ConcentrationDetection:
                                     self.alarm_flag = False
 
             if self.bounds > 3:
-                alarm_flag = True  #todo solve doubling of alarm_flag and self.alarm_flag (wtf is this spaghetti even)
+                self.alarm_flag = True  #todo solve doubling of alarm_flag and self.alarm_flag (wtf is this spaghetti even)
                 if results_face.multi_face_landmarks:
                     if self.bound_workspace[0][0] < x < self.bound_workspace[1][0]:
                         # todo add funtion for checking if workspace is set
                         if self.bound_workspace[0][1] < y < self.bound_workspace[1][1]:
                             if self.bound_workspace[0][2] < z < self.bound_workspace[1][2]:
-                                alarm_flag = False
+                                self.alarm_flag = False
 
-                if alarm_flag:
+                if self.alarm_flag:
                     if not self.curr_alarm_time:
                         self.curr_alarm_time = time.time()
                         self.start_alarm_time = time.time()
@@ -284,12 +284,10 @@ class ConcentrationDetection:
                 else:
                     self.curr_alarm_time = self.start_alarm_time = None
 
-            #cv2.imshow('Showcase', self.frame)
             ret, jpeg = cv2.imencode('.jpg', self.frame)
             self.frame = jpeg.tobytes()
 
     def showcase(self):
-        # while True:
         if not self.run_initialized:
             self._initialize()
             self.run_initialized = True
@@ -327,11 +325,6 @@ class ConcentrationDetection:
             ret, jpeg = cv2.imencode('.jpg', self.frame)
 
             self.frame = jpeg.tobytes()
-            # cv2.imshow('Showcase', self.frame)
-        #     if cv2.waitKey(5) & 0xFF == 27:
-        #         break
-        # self.cap.release()
-        # cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
@@ -343,7 +336,3 @@ if __name__ == "__main__":
         if cv2.waitKey(5) & 0xFF == 27:
             concentration_detection.save_workspace()
             break
-    # while True:
-    #     concentration_detection.run()
-    #     if cv2.waitKey(5) & 0xFF == 27:
-    #         break

@@ -37,16 +37,16 @@
   #menu-background-pattern {
   background-image: radial-gradient(
     rgba(255, 255, 255, 0.1) 9%,
-    transparent 20%
+    transparent 10%
   );
    background-position: 0% 0%;
-  background-size: 12vmin 12vmin;
+  background-size: 10vmin 10vmin;
   height: 100vh;
   left: 0px;
   position: absolute;
   top: 0px;
   width: 100vw;
-  z-index: 1;
+  z-index: -11;
 }
 
 .menu-item {
@@ -115,7 +115,7 @@ function open_video() {
 
     <div class = "menu">
         <div class = "menu-items">
-        <form name="InputSelect" method="post">
+        <form name="InputSelect" method="post" enctype="multipart/form-data">
             <label class = "menu-item" >Mode</label>
             <br>
             <div style="display:none;">
@@ -125,7 +125,7 @@ function open_video() {
 
             </div>
 
-            <select name="ModeSelect" id="ModeSelect" onchange="select_to_input()" class="input">
+            <select name="ModeSelect" id="ModeSelect" onchange="select_to_input()" class="input" required>
 
                 <option value="">--Please choose an option--</option>
                 <option value="Configuration">Configuration</option>
@@ -147,7 +147,7 @@ function open_video() {
             <label class = "menu-item" >Camera ID</label>
             <br>
             <input type="number" step="1" name="Camera ID" class="input"
-                   placeholder="0" min = "0"
+                   placeholder="0" min = "0" required
                    value="{{ request.form['Camera ID'] }}"></input>
 
             <br>
@@ -156,7 +156,7 @@ function open_video() {
             <label class = "menu-item">Distraction Time</label>
             <br>
             <input type="number" step="1" name="Distraction Time" class="input"
-                   placeholder="30" min = "0"
+                   placeholder="30" min = "0" required
                    value="{{ request.form['Distraction Time'] }}"></input>
 
             <br>
@@ -165,7 +165,7 @@ function open_video() {
             <label class = "menu-item" >Detection Confidence</label>
             <br>
             <input type="number" step="0.1" name="Detection Confidence" class="input"
-                   placeholder="0.5"  min = "0" max = "1"
+                   placeholder="0.5"  min = "0" max = "1" required
                    value="{{ request.form['Detection Confidence'] }}"></input>
 
             <br>
@@ -174,11 +174,16 @@ function open_video() {
             <label class = "menu-item"  >Tracking Confidence</label>
             <br>
             <input type="number" step="0.1" name="Tracking Confidence" class="input"
-                   placeholder="0.5" min = "0" max = "1"
+                   placeholder="0.5" min = "0" max = "1" required
                    value="{{ request.form['Tracking Confidence'] }}"></input>
 
             <br>
             <br>
+            <div id="workspace" class = "menu-item">
+
+                <input type="file" class="input"  value="{{ request.form['Workspace'] }}" name="workspace" accept="application/JSON"></input>
+
+            </div>
             <br>
             <button type="submit" onclick="open_video()" style="width:2.25;height:1.75em;font-size:1.25em;">Submit</button>
         </form>
@@ -189,8 +194,11 @@ function open_video() {
     <div class="row">
         <div class="col-lg-8  offset-lg-2">
             <h3 class="stream">Live Streaming</h3>
-            <img src="{{ url_for('video_feed') }}" width="100%" opacity = "1.0" >
+            <img src="{{ url_for('video_feed') }}" width="100%" >
         </div>
+        <br>
+        <button> <a href="save_and_quit">Save Workspace and Quit </a></button>
+        <button> <a href="/"> Quit </a></button>
     </div>
     </div>
 
