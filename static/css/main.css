@@ -1,0 +1,64 @@
+body {
+    background-color: rgb(20, 20, 20);
+    margin: 0px;
+  }
+
+h1 {
+text-align: center;
+ color: white;
+ font-size: 2.5em;
+}
+.flex-container {
+  display: flex;
+
+  }
+.menu {
+position:absolute;
+left: 1.5em;
+}
+.menu-items {
+margin-left: 2rem;
+position: absolute;
+z-index: 2;
+  }
+.container {
+ margin: auto;
+ width: 50vw;
+ padding: 10px;
+}
+#menu-background-pattern {
+background-image: radial-gradient(
+  rgba(255, 255, 255, 0.1) 9%,
+  transparent 10%
+);
+ background-position: 0% 0%;
+background-size: 10vmin 10vmin;
+height: 100vh;
+left: 0px;
+position: absolute;
+top: 0px;
+width: 100vw;
+z-index: -11;
+}
+
+.menu-item {
+color: white;
+display: block;
+font-family: 'Ibarra Real Nova', serif;
+font-size: 1.75em;
+}
+.stream {
+color: white;
+display: block;
+font-family: 'Ibarra Real Nova', serif;
+font-size: 1.75em;
+}
+.input {
+height: 1.75em;
+font-size: 1em;
+}
+.click {
+width:5em;
+height:2.25em;
+font-size:1.25em;
+}

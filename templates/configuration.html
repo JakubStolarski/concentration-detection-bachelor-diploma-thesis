@@ -3,110 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <title>First Flask App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 
 <style>
-    body {
-      background-color: rgb(20, 20, 20);
-      margin: 0px;
-    }
-
-  h1 {
-  text-align: center;
-   color: white;
-   font-size: 2.5em;
-  }
-  .flex-container {
-    display: flex;
-
-    }
-  .menu {
-  position:absolute;
-  left: 1.5em;
-  }
-  .menu-items {
-  margin-left: 2rem;
-  position: absolute;
-  z-index: 2;
-    }
-  .container {
-   margin: auto;
-   width: 50vw;
-   padding: 10px;
-  }
-  #menu-background-pattern {
-  background-image: radial-gradient(
-    rgba(255, 255, 255, 0.1) 9%,
-    transparent 10%
-  );
-   background-position: 0% 0%;
-  background-size: 10vmin 10vmin;
-  height: 100vh;
-  left: 0px;
-  position: absolute;
-  top: 0px;
-  width: 100vw;
-  z-index: -11;
-}
-
-.menu-item {
-  color: white;
-  display: block;
-  font-family: 'Ibarra Real Nova', serif;
-  font-size: 1.75em;
-}
-.stream {
-  color: white;
-  display: block;
-  font-family: 'Ibarra Real Nova', serif;
-  font-size: 1.75em;
-}
-.input {
-height: 1.75em;
-font-size: 1em;
+.click_2 {
+width:14em;
+height:2.25em;
+font-size:1.25em;
 }
 </style>
 <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.js"></script>
-<!--<script src="{{url_for('static', filename='input_and_video_managemet.js')}}"></script>-->
-<script type="text/javascript">
-function yesnoCheck() {
-    var x = document.getElementById("ModeSelect").value;
-
-    if (x == 'Video') {
-        document.getElementById('IfYes').style.display = 'block';
-    }
-    else {
-        document.getElementById('IfYes').style.display = 'none';
-    }
-}
-setInterval('yesnoCheck()', 500);
-
-function select_to_input() {
-    var x = document.getElementById("ModeSelect").value;
-    switch (x) {
-        case "Configuration":
-            document.getElementById('Mode').value = '0'
-            break;
-        case "Run":
-            document.getElementById('Mode').value = '1'
-            break;
-        case "Video":
-            document.getElementById('Mode').value = '2'
-            break;
-        case "Showcase":
-            document.getElementById('Mode').value = '3'
-            break;
-    }
-}
-
-function open_video() {
- var x = document.forms["InputSelect"]["Camera ID"].value
-    if (x) {
-      document.getElementById("streaming").style.display = 'block';
-    }
-}
-
-</script>
+<script src="{{url_for('static', filename='js/video_management.js')}}"></script>
+<script src="{{url_for('static', filename='js/input_management.js')}}"></script>
+<script src="{{url_for('static', filename='js/show_element.js')}}"></script>
+<script type="text/javascript">setInterval('yesnoCheck()', 500);</script>
 
 <body onload="javascript: yesnoCheck(); open_video();">
     <h1>{% block title %} Configuration Menu {% endblock %}</h1>
@@ -130,8 +41,7 @@ function open_video() {
                 <option value="">--Please choose an option--</option>
                 <option value="Configuration">Configuration</option>
                 <option value="Run">Run</option>
-                <option value="Video">Video</option>
-                <option value="Showcase">Showcase</option>
+<!--                <option value="Video">Video</option>-->
 
             </select>
 
@@ -185,7 +95,7 @@ function open_video() {
 
             </div>
             <br>
-            <button type="submit" onclick="open_video()" style="width:2.25;height:1.75em;font-size:1.25em;">Submit</button>
+            <button type="submit" onclick="open_video()" class="click">Submit</button>
         </form>
         </div>
     </div>
@@ -197,8 +107,10 @@ function open_video() {
             <img src="{{ url_for('video_feed') }}" width="100%" >
         </div>
         <br>
-        <button> <a href="save_and_quit">Save Workspace and Quit </a></button>
-        <button> <a href="/"> Quit </a></button>
+        <div style="text-align:center;">
+            <button class="click_2"> <a href="save_and_quit">Save Workspace and Quit </a></button>
+            <button class="click"> <a href="/"> Quit </a></button>
+        </div>
     </div>
     </div>
 

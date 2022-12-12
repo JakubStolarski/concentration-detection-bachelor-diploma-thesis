@@ -1,10 +1,6 @@
 <!DOCTYPE html>
 <html lang='en'>
 <style>
-    body {
-      background-color: rgb(20, 20, 20);
-      margin: 0px;
-    }
   h1 {text-align: center;
    color: white;
    font-size: 2.5em;
@@ -14,44 +10,13 @@
   position:absolute;
   left: 1.5em;
   }
-  .menu-items {
-  margin-left: 2rem;
-  position: absolute;
-  z-index: 2;
-    }
-  .container {
-   margin: auto;
-   width: 50vw;
-   padding: 10px;
-  }
-    .flex-container {
-    display: flex;
-
-    }
-   #menu-background-pattern {
-  background-image: radial-gradient(
-    rgba(255, 255, 255, 0.1) 9%,
-    transparent 10%
-  );
-   background-position: 0% 0%;
-  background-size: 10vmin 10vmin;
-  height: 100vh;
-  left: 0px;
-  position: absolute;
-  top: 0px;
-  width: 100vw;
-  z-index: -1;
-}
 </style>
 <head>
   <meta charset="utf-8" />
   <title>Concentration detection</title>
-  <link type="text/css" rel="stylesheet"
-        href="{{ url_for('static',
-              filename='hello.css')}}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body>
-<!--	<element onload = "concentration_detection_onload">-->
     <h1>
         Detektor koncentracji
     </h1>
@@ -66,10 +31,5 @@
         <a href=info><button type = "submit" style="width:2.25;height:1.75em;font-size:1.25em;" > Instrukcja </button></a>
     </div>
     <div id="menu-background-pattern"></div>
-<!--	<a href=configuration><button type = "submit" onclick = 'myfunction_clickevent()'> Configure and Run </button>-->
-<!--	<a href=info><button type = "submit" onclick = 'info_clickevent()'> Info </button>-->
-    <div class="content">
-    {% block content %} {% endblock %}
-    </div>
 </body>
 </html>

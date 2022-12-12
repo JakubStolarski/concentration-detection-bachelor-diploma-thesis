@@ -3,73 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>First Flask App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
-<style>
-     body {
-      background-color: rgb(20, 20, 20);
-      margin: 0px;
-    }
-  h1 {text-align: center;
-   color: white;
-   font-size: 2.5em;
-  }
-  .center {text-align: center;}
-    .menu {
-  position:absolute;
-  left: 1.5em;
-  }
-  .menu-items {
-  margin-left: 2rem;
-  position: absolute;
-  z-index: 2;
-    }
-    .menu-item {
-  color: white;
-  display: block;
-  font-family: 'Ibarra Real Nova', serif;
-  font-size: 1.75em;
-}
-  .container {
-   margin: auto;
-   width: 50vw;
-   padding: 10px;
-  }
-    .flex-container {
-    display: flex;
-
-    }
-   #menu-background-pattern {
-  background-image: radial-gradient(
-    rgba(255, 255, 255, 0.1) 9%,
-    transparent 10%
-  );
-   background-position: 0% 0%;
-  background-size: 10vmin 10vmin;
-  height: 100vh;
-  left: 0px;
-  position: absolute;
-  top: 0px;
-  width: 100vw;
-  z-index: -1;
-}
-.input {
-height: 1.75em;
-font-size: 1em;
-}
-</style>
 <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.js"></script>
-<!--<script src="{{url_for('static', filename='input_and_video_managemet.js')}}"></script>-->
-<script type="text/javascript">
+<script src="{{url_for('static', filename='js/video_management.js')}}"></script>
 
-function open_video() {
- var x = document.forms["InputSelect"]["Camera ID"].value
-    if (x) {
-      document.getElementById("streaming").style.display = 'block';
-    }
-}
-
-
-</script>
 <body onload="javascript: open_video()">
     <h1>{% block title %} Showcase {% endblock %}</h1>
     <br><br>
@@ -78,12 +16,12 @@ function open_video() {
             <form name="InputSelect" method="post">
                 <label class="menu-item">Camera ID</label>
                 <br>
-                <input type='number' step="1" name="Camera ID" class="input"
-                       placeholder="ID" min = "0"
-                       value="{{ request.form['Camera ID'] }}"></input>
                 <script type="text/javascript">
                     document.getElementById('Camera ID').value = "<?php echo $_GET['Camera ID'];?>";
                 </script>
+                <input type='number' step="1" name="Camera ID" class="input"
+                       placeholder="ID" min = "0"
+                       value="{{ request.form['Camera ID'] }}"></input>
                 <br><br>
                  <button type="submit" style="width:2.25;height:1.75em;font-size:1.25em;">Submit</button>
             </form>
@@ -91,12 +29,16 @@ function open_video() {
         <div class="container" id='streaming'  style="display:none;">
             <div class="row">
                 <div class="col-lg-8  offset-lg-2">
-                    <h3 class="mt-5">Live Streaming</h3>
+                    <h3 class="stream">Live Streaming</h3>
                     <img src="{{ url_for('video_feed') }}" width="100%">
+                    <button class="click"> <a href="/"> Quit </a></button>
                 </div>
             </div>
         </div>
         <div id="menu-background-pattern"></div>
+
+    </div>
+    </div>
     </div>
 
 
