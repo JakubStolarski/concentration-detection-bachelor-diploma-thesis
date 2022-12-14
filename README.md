@@ -1,14 +1,17 @@
 # Concentration Detecion Application (WIP)
-This application was made as a thesis for my bachelor diploma. It is a simple application, which uses mediapipe library and basic formulas of machine vision, to allow for a user to monitor their concentration. 
+This application was made as a thesis for my bachelor diploma. It is a simple application, which uses mediapipe library and basic formulas of machine vision, to allow for a user to monitor their focus on chosen workspace. 
 
+# Basics
 There are three modes at the moment: Configuration, Run and Showcase.
 
 Cofiguration - Allows user to configure their workspace 
 Run - Is a basic mode that analyzes concentration based on user set parameters
 Showcase - Shows POI taken by the program, approximated viewing direction and time that passes
 
+Functions for concentration detection can be found in concentration_detection.py, the program itself is run from main_front.py
+
 # Configuration method
-1. Run flaskend.py
+1. Run main_front.py
 2. Select Cofiguration mode, set it parameters and submit
 3. Put your thumb up (if it is detected 'Okay!' will be written on video feed)
 4. Create a rectangle "with your face" - stare at one of the corners of yor workspace and then move onto another by moving your face towards it
@@ -21,4 +24,4 @@ Showcase - Shows POI taken by the program, approximated viewing direction and ti
 3. For Detection and Tracing Confidence please refer to Mediapipe documentation: https://google.github.io/mediapipe/
 
 # Bibliography
-The whole bibliography can be found in library.bib file
+Bibliography can be found at: https://files.fm/u/c4djwnvtt
