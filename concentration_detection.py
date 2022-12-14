@@ -1,7 +1,6 @@
 import cv2
 from enum import Enum, IntEnum
 import easygui as e
-from json import JSONEncoder
 import json
 import mediapipe as mp
 import numpy as np
@@ -328,11 +327,11 @@ class ConcentrationDetection:
 
 
 if __name__ == "__main__":
-    concentration_detection = ConcentrationDetection(Modes.CALIBRATION, 1)
+    concentration_detector = ConcentrationDetection(Modes.CALIBRATION, 1)
     while True:
-        concentration_detection.run()
+        concentration_detector.run()
         if cv2.waitKey(5) == ord('a'):
-            concentration_detection.read_workspace(saved_workspace_file='saved_workspace.json')
+            concentration_detector.read_workspace(saved_workspace_file='saved_workspace.json')
         if cv2.waitKey(5) & 0xFF == 27:
-            concentration_detection.save_workspace()
+            concentration_detector.save_workspace()
             break

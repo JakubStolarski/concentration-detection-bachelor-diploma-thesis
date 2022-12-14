@@ -1,7 +1,7 @@
 import flask
 from flask import Flask, redirect, render_template, request, Response, url_for
 import pandas as pd
-import tester
+import concentration_detection
 
 
 class NoInput(Exception):
@@ -12,42 +12,42 @@ class NoInput(Exception):
 class InputValues:
     def __init__(self):
         self.values = {
-            tester.InputNames.Mode: None,
-            tester.InputNames.Camera_ID: 0,
-            tester.InputNames.Distraction_Time: 5,
-            tester.InputNames.Detection_Confidence: 0.5,
-            tester.InputNames.Tracking_Confidence: 0.5
+            concentration_detection.InputNames.Mode: None,
+            concentration_detection.InputNames.Camera_ID: 0,
+            concentration_detection.InputNames.Distraction_Time: 5,
+            concentration_detection.InputNames.Detection_Confidence: 0.5,
+            concentration_detection.InputNames.Tracking_Confidence: 0.5
         }
         self.frame = None
         self.workspace = None
 
 
-input_values = concentration_detection = None
+input_values = concentration_detector = None
 
 
 def base_state():
-    global input_values, concentration_detection
+    global input_values, concentration_detector
     input_values = InputValues()
-    concentration_detection = tester.ConcentrationDetection()
+    concentration_detector = concentration_detection.ConcentrationDetection()
 
 
 app = Flask(__name__, template_folder='templates')
 
 
-def configure_concentration_detection(concentration_detection):
+def configure_concentration_detection(concentration_detector):
     while True:
-        if concentration_detection.mode is not None:
-            if concentration_detection.mode == tester.Modes.SHOWCASE:
-                concentration_detection.showcase()
+        if concentration_detector.mode is not None:
+            if concentration_detector.mode == concentration_detection.Modes.SHOWCASE:
+                concentration_detector.showcase()
             else:
                 if input_values.workspace is not None:
-                    concentration_detection.read_workspace(input_values.workspace)
-                concentration_detection.run()
+                    concentration_detector.read_workspace(input_values.workspace)
+                concentration_detector.run()
         else:
             pass
         # if no frame was captured return a single byte
         yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n'
-               + concentration_detection.frame + b'\r\n\r\n') if concentration_detection.frame else bytes()
+               + concentration_detector.frame + b'\r\n\r\n') if concentration_detector.frame else bytes()
 
 
 @app.route('/')
@@ -86,22 +86,23 @@ def info():
 def showcase():
     global input_values
     if request.method == 'POST':
-        input_values.values[tester.InputNames.Camera_ID], input_values.values[tester.InputNames.Mode] \
-            = int(request.form[tester.InputNames.Camera_ID]), 3
+        input_values.values[concentration_detection.InputNames.Camera_ID], \
+        input_values.values[concentration_detection.InputNames.Mode] \
+            = int(request.form[concentration_detection.InputNames.Camera_ID]), 3
     return render_template('showcase.html')
 
 
 @app.route('/video_feed')
 def video_feed():
-    global input_values, concentration_detection
-    concentration_detection.set_input_data(input_values)
+    global input_values, concentration_detector
+    concentration_detector.set_input_data(input_values)
 
-    return Response(configure_concentration_detection(concentration_detection), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(configure_concentration_detection(concentration_detector), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 @app.route('/save_and_quit')
 def save_and_quit():
-    concentration_detection.save_workspace()
+    concentration_detector.save_workspace()
     return redirect(url_for('index'))
 
 
