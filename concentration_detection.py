@@ -5,6 +5,7 @@ import json
 import mediapipe as mp
 import numpy as np
 import time
+import winsound
 
 
 class DetectionError(Exception):
@@ -276,7 +277,8 @@ class ConcentrationDetection:
                     else:
                         self.curr_alarm_time = time.time()
                         if self.curr_alarm_time - self.start_alarm_time > self.distraction_tolerance:
-                            e.msgbox("An error has occured! :(", "Error")
+                            winsound.PlaySound('SystemExclamation', winsound.SND_FILENAME)
+                            e.msgbox("Please focus on workspace", "Lack of Concentration")
                             cv2.putText(self.frame, "Alarm!",
                                         (int(self.frame.shape[1] / 2), int(self.frame.shape[0] / 2)),
                                         cv2.FONT_HERSHEY_SIMPLEX, 2.0, (0, 0, 255), 2)
