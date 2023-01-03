@@ -1,7 +1,6 @@
 flask==2.2.2
 mediapipe==0.8.11
 numpy==1.23.2
-screeninfo==0.8.1
 pandas==1.4.3
 easygui==0.98.3
 opencv-contrib-python==4.6.0.66

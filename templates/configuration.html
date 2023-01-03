@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>First Flask App</title>
+    <title>Concentration detection</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 
@@ -63,7 +63,7 @@ font-size:1.25em;
             <br>
             <br>
 
-            <label class = "menu-item">Distraction Time</label>
+            <label class = "menu-item">Distraction Time [s]</label>
             <br>
             <input type="number" step="1" name="Distraction Time" class="input"
                    placeholder="30" min = "0" required
@@ -89,8 +89,9 @@ font-size:1.25em;
 
             <br>
             <br>
+            <label class="menu-item"> Workspace File </label>
+            <br>
             <div id="workspace" class = "menu-item">
-
                 <input type="file" class="input"  value="{{ request.form['Workspace'] }}" name="workspace" accept="application/JSON"></input>
 
             </div>

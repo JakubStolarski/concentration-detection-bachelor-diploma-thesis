@@ -51,6 +51,7 @@ class ConcentrationDetection:
         self._activate_mp_solutions(detection_confidence, tracking_confidence)
         self._set_initial_boundaries()
         self.starter_time = time.time()
+        self.old_frame_time = 0
         self.alarm_flag = False
         self.mode = mode
         self.camera_id = camera_id
@@ -295,6 +296,7 @@ class ConcentrationDetection:
 
         vid, self.frame = self.cap.read()
         if vid:
+            new_frame_time = time.time()
             img_h, img_w = self.frame.shape[:2]
             is_ok, results_hand, results_face, p1, p2, x, y, z = self._frame_operations()
 
@@ -316,8 +318,12 @@ class ConcentrationDetection:
             if is_ok:
                 cv2.putText(self.frame, "Okay!!", (int(self.frame.shape[1] * 0.7), int(self.frame.shape[0] * 0.85)),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-
-            running_time = "--- %s seconds ---" % round((time.time() - self.starter_time), 2)
+            if not self.old_frame_time == 0 or new_frame_time - self.old_frame_time > 2:
+                running_time = "--- %s FPS ---" % round(1/(new_frame_time-self.old_frame_time),2)
+                self.old_frame_time = new_frame_time
+            else:
+                running_time = "0"
+                self.old_frame_time = new_frame_time
             # show how much time passed
             cv2.putText(self.frame, running_time, (int(self.frame.shape[1] * 0.1), int(self.frame.shape[0] * 0.8)),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1)
