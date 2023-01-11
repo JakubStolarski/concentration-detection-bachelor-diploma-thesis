@@ -120,7 +120,6 @@ class ConcentrationDetection:
             str(results.multi_hand_landmarks[-1].landmark[int(landmark)]).split('\n')[coordinate].split(" ")[1])
 
     def _finger(self, landmark, results, width, height):
-        # is z="finger, it returns which finger is closed. If z="true coordinate", it returns the true coordinates
         if results.multi_hand_landmarks is not None:
             try:
                 plandmark_x = self.give_coordinate("x", landmark, results)
@@ -205,9 +204,9 @@ class ConcentrationDetection:
             p1, p2, x, y, z = self._get_translation_and_rotation(results_face)
 
         if results_hand.multi_hand_landmarks:
+            thumb_tip = self._finger(4, results_hand, self.frame.shape[1], self.frame.shape[0])
             for finger_landmark in [Hand.THUMB_BASE, Hand.THUMB_MID_LOW, Hand.THUMB_MID_HIGH, Hand.INDEX_MID_LOW]:
                 is_ok = True
-                thumb_tip = self._finger(4, results_hand, self.frame.shape[1], self.frame.shape[0])
                 section_landmark = self._finger(finger_landmark, results_hand, self.frame.shape[1], self.frame.shape[0])
                 if thumb_tip[1] > section_landmark[1]:
                     is_ok = False
@@ -246,15 +245,19 @@ class ConcentrationDetection:
                     workspace = [[x, y, z]]
                     for point in workspace:
                         for elem_num, coordinate in enumerate(point):
+
                             if coordinate < self.bound_workspace[0][elem_num]:
                                 self.bound_workspace[0][elem_num] = coordinate
                                 self.bounded = True
+
                             if coordinate > self.bound_workspace[1][elem_num]:
                                 self.bound_workspace[1][elem_num] = coordinate
                                 self.bounded = True
                             if self.bounded:
+
                                 self.bounds += 1
                                 self.bounded = False
+
                     if self.bounds >= 4:
                         self.alarm_flag = True
                         if x in range(int(self.bound_workspace[0][0]), int(self.bound_workspace[1][0])):
@@ -263,10 +266,9 @@ class ConcentrationDetection:
                                     self.alarm_flag = False
 
             if self.bounds > 3:
-                self.alarm_flag = True  #todo solve doubling of alarm_flag and self.alarm_flag (wtf is this spaghetti even)
+                self.alarm_flag = True
                 if results_face.multi_face_landmarks:
                     if self.bound_workspace[0][0] < x < self.bound_workspace[1][0]:
-                        # todo add funtion for checking if workspace is set
                         if self.bound_workspace[0][1] < y < self.bound_workspace[1][1]:
                             if self.bound_workspace[0][2] < z < self.bound_workspace[1][2]:
                                 self.alarm_flag = False
